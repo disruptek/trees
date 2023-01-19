@@ -1,4 +1,3 @@
-name          = "trees"
 version       = "0.1.0"
 author        = "Brian Shannan <brianshannan@gmail.com>"
 description   = "Implementations of trees in Nim"

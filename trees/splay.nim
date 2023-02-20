@@ -237,7 +237,7 @@ proc remove*[K, V](tree: var SplayTree[K, V], key: K): bool {.discardable.} =
   return true
 
 proc len*[K, V](tree: SplayTree[K, V]): int =
-  ## Returns the number of items the in tree
+  ## Returns the number of items in the tree.
   tree.size
 
 iterator pairs*[K, V](tree: SplayTree[K, V]): (K, V) =

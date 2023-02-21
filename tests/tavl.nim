@@ -15,7 +15,7 @@ proc main =
     check(tree.root.left.key == 1)
 
   suite "avl tree":
-    test "avl simple insert":
+    test "simple insert":
       var tree: AVLTree[int, char]
       check(tree.insert(5, 'b'))
       check(tree.insert(10, 'c'))
@@ -25,52 +25,62 @@ proc main =
       check(tree.find(10) == ('c', true))
       check(tree.find(15) == ('\0', false))
 
-    test "avl insert balanced":
+    test "insert balanced":
       var tree: AVLTree[int, char]
       check(tree.insert(5, 'b'))
       check(tree.insert(1, 'a'))
       check(tree.insert(10, 'c'))
       checkTree(tree)
 
-    test "avl insert right leaning":
+    test "insert right leaning":
       var tree: AVLTree[int, char]
       check(tree.insert(1, 'a'))
       check(tree.insert(5, 'b'))
       check(tree.insert(10, 'c'))
       checkTree(tree)
 
-    test "avl insert right leaning double rotation":
+    test "insert right leaning double rotation":
       var tree: AVLTree[int, char]
       check(tree.insert(1, 'a'))
       check(tree.insert(10, 'c'))
       check(tree.insert(5, 'b'))
       checkTree(tree)
 
-    test "avl insert left leaning":
+    test "insert left leaning":
       var tree: AVLTree[int, char]
       check(tree.insert(10, 'c'))
       check(tree.insert(5, 'b'))
       check(tree.insert(1, 'a'))
       checkTree(tree)
 
-    test "avl insert left leaning double rotation":
+    test "insert left leaning double rotation":
       var tree: AVLTree[int, char]
       check(tree.insert(10, 'c'))
       check(tree.insert(1, 'a'))
       check(tree.insert(5, 'b'))
       checkTree(tree)
 
-    test "avl inorder":
+    test "in-order traversal":
       var tree: AVLTree[int, char]
       for i in 1..10:
-        tree.insert(i, 'a')
+        tree.insert(i, chr(ord('a') + i))
       var i = 1
-      for key, value in tree.inOrderTraversal():
+      for key, value in tree.pairs():
         check(i == key)
         i += 1
       check(i == 11)
+      i = 1
+      for key in tree.keys():
+        check(i == key)
+        i += 1
+      check(i == 11)
+      i = 1
+      for value in tree.values():
+        check(i == ord(value) - ord('a'))
+        i += 1
+      check(i == 11)
 
-    test "avl remove simple":
+    test "remove simple":
       var tree: AVLTree[int, char]
       tree.insert(10, 'a')
       tree.insert(15, 'b')
@@ -94,7 +104,7 @@ proc main =
       check(tree.find(15) == ('\0', false))
       check(tree.find(20) == ('\0', false))
 
-    test "avl remove rotation":
+    test "remove rotation":
       var tree: AVLTree[int, char]
       tree.insert(1, 'a')
       tree.insert(5, 'b')
@@ -110,7 +120,7 @@ proc main =
       check(tree.find(15) == ('d', true))
       check(tree.find(20) == ('e', true))
 
-    test "avl remove double rotation":
+    test "remove double rotation":
       var tree: AVLTree[int, char]
       tree.insert(5, 'b')
       tree.insert(1, 'a')
@@ -124,7 +134,7 @@ proc main =
       check(tree.find(10) == ('c', true))
       check(tree.find(15) == ('d', true))
 
-    test "avl remove non leaf":
+    test "remove non-leaf":
       var tree: AVLTree[int, char]
       tree.insert(5, 'b')
       tree.insert(1, 'a')
@@ -138,12 +148,25 @@ proc main =
       check(tree.find(10) == ('\0', false))
       check(tree.find(15) == ('d', true))
 
-    test "avl remove nonexistant":
+    test "remove non-existent":
       var tree: AVLTree[int, char]
       tree.insert(1, 'a')
       tree.insert(5, 'b')
       check(tree.len() == 2)
       tree.remove(10)
       check(tree.len() == 2)
+
+    test "natural api":
+      var tree: AVLTree[int, char]
+      check(tree.insert(1, 'a'))
+      check(tree.insert(5, 'b'))
+      check(tree.insert(10, 'c'))
+      tree[1] = 'a'
+      tree[5] = 'b'
+      check tree[1] == 'a'
+      check tree[10] == 'c'
+      check tree.pop(1) == 'a'
+      tree.pop(10)
+      check tree[5] == 'b'
 
 main()

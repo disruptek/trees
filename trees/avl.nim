@@ -173,9 +173,23 @@ proc find*[K, V](tree: AVLTree[K, V], key: K): (V, bool) =
   ## if the key was found, and a default value and false if not.
   let node = tree.findNode(key)
   if not node.isNil:
-    return (node.value, true)
-  var default: V
-  return (default, false)
+    result = (node.value, true)
+
+proc contains*[K, V](tree: AVLTree[K, V]; key: K): bool =
+  ## Returns `true` if `key` exists in `tree`.
+  not tree.findNode(key).isNil
+
+proc `[]=`*[K, V](tree: var AVLTree[K, V]; key: K; value: V) =
+  ## Add `key` and `value` pair to `tree`.
+  discard tree.insert(key, value)
+
+proc `[]`*[K, V](tree: AVLTree[K, V]; key: K): V =
+  ## Recover value of `key` in `tree`.
+  let node = tree.findNode(key)
+  if node.isNil:
+    raise KeyError.newException "not found"
+  else:
+    result = node.value
 
 proc fixRemove[K, V](tree: var AVLTree[K, V], node: Node[K, V]) =
   ## Rebalaces a tree after a removal
@@ -227,14 +241,7 @@ proc fixRemove[K, V](tree: var AVLTree[K, V], node: Node[K, V]) =
     curr = parent
     parent = curr.parent
 
-proc remove*[K, V](tree: var AVLTree[K, V], key: K): bool {.discardable.} =
-  ## Remove a key value pair from the tree. Returns true if something was
-  ## removed, false if the key wasn't found, so nothing was removed.
-  var node = tree.findNode(key)
-  # If a node with that data doesn't exist, nothing to do
-  if node.isNil:
-    return false
-
+template removeImpl(tree: var AVLTree; node: var Node): untyped =
   tree.size -= 1
   if not node.left.isNil and not node.right.isNil:
     # Internal node; the successor's data can be placed here without violating
@@ -258,13 +265,34 @@ proc remove*[K, V](tree: var AVLTree[K, V], key: K): bool {.discardable.} =
   else:
     node.parent.right = child
   tree.fixRemove(child)
-  result = true
+
+proc remove*[K, V](tree: var AVLTree[K, V], key: K): bool {.discardable.} =
+  ## Remove a key value pair from the tree. Returns true if something was
+  ## removed, false if the key wasn't found, so nothing was removed.
+  var node = tree.findNode(key)
+  # If a node with that data doesn't exist, nothing to do
+  result = not node.isNil
+  if result:
+    removeImpl(tree, node)
+
+proc del*[K, V](tree: var AVLTree[K, V], key: K) =
+  discard remove(tree, key)
+
+proc pop*[K, V](tree: var AVLTree[K, V], key: K): V {.discardable.} =
+  ## Remove `key` from `tree` and return its value.
+  var node = tree.findNode(key)
+  # If a node with that data doesn't exist, nothing to do
+  if node.isNil:
+    raise KeyError.newException "not found"
+  else:
+    result = move node.value
+    removeImpl(tree, node)
 
 proc len*[K, V](tree: AVLTree[K, V]): int =
   ## Returns the number of items in the tree.
   tree.size
 
-iterator inOrderTraversal*[K, V](tree: AVLTree[K, V]): (K, V) =
+iterator pairs*[K, V](tree: AVLTree[K, V]): (K, V) =
   ## Iterates over the elements of the tree in-order.
   var node = tree.root
   var stack: seq[Node[K, V]]
@@ -272,6 +300,32 @@ iterator inOrderTraversal*[K, V](tree: AVLTree[K, V]): (K, V) =
     if node.isNil:
       node = stack.pop()
       yield (node.key, node.value)
+      node = node.right
+    else:
+      stack.add(node)
+      node = node.left
+
+iterator keys*[K, V](tree: AVLTree[K, V]): K =
+  ## Iterates over the elements of the tree in-order.
+  var node = tree.root
+  var stack: seq[Node[K, V]]
+  while stack.len > 0 or not node.isNil:
+    if node.isNil:
+      node = stack.pop()
+      yield node.key
+      node = node.right
+    else:
+      stack.add(node)
+      node = node.left
+
+iterator values*[K, V](tree: AVLTree[K, V]): V =
+  ## Iterates over the elements of the tree in-order.
+  var node = tree.root
+  var stack: seq[Node[K, V]]
+  while stack.len > 0 or not node.isNil:
+    if node.isNil:
+      node = stack.pop()
+      yield node.value
       node = node.right
     else:
       stack.add(node)

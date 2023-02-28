@@ -163,10 +163,11 @@ proc main =
       check(tree.insert(10, 'c'))
       tree[1] = 'a'
       tree[5] = 'b'
+      tree[5] = 'd'
       check tree[1] == 'a'
       check tree[10] == 'c'
       check tree.pop(1) == 'a'
       tree.pop(10)
-      check tree[5] == 'b'
+      check tree[5] == 'd'
 
 main()

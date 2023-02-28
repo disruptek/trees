@@ -183,7 +183,7 @@ proc `[]=`*[K, V](tree: var AVLTree[K, V]; key: K; value: V) =
   ## Add `key` and `value` pair to `tree`.
   discard tree.insert(key, value)
 
-proc `[]`*[K, V](tree: AVLTree[K, V]; key: K): V =
+proc `[]`*[K, V](tree: AVLTree[K, V]; key: K): var V =
   ## Recover value of `key` in `tree`.
   let node = tree.findNode(key)
   if node.isNil:

@@ -34,10 +34,9 @@ template newNode[K, V](parant: Node[K, V]; k: K; v: V): Node[K, V] =
 
 proc successor[K, V](tree: AVLTree[K, V], node: Node[K, V]): Node[K, V] =
   ## Returns the successor of the given node, or nil if one doesn't exist.
-  if not node.right.isNil:
-    result = node.right
-    while not result.right.isNil:
-      result = result.right
+  result = node.right
+  while not result.right.isNil:
+    result = result.right
 
 proc rotateLeft[K, V](tree: var AVLTree[K, V], parent: Node[K, V]) =
   ## Rotates a tree left around the given node

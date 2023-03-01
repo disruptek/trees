@@ -170,4 +170,21 @@ proc main =
       tree.pop(10)
       check tree[5] == 'd'
 
+    test "select, rank":
+      var tree: AVLTree[int, char]
+      check tree.insert(5, 'b')
+      check tree.select(1).key == 5
+      check tree.insert(10, 'c')
+      check tree.select(1).key == 5
+      check tree.select(2).key == 10
+      check tree.insert(1, 'a')
+      check tree.select(1).val == 'a'
+      check tree.select(1).key == 1
+      check tree.select(2).key == 5
+      check tree.select(3).key == 10
+      check tree.select(3).val == 'c'
+      check 1 == tree.rank(tree.select(1).key)
+      check 2 == tree.rank(tree.select(2).key)
+      check 3 == tree.rank(tree.select(3).key)
+
 main()

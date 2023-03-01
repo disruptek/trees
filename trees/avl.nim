@@ -29,6 +29,8 @@ type
     root: Node[K, V]
     size: int
 
+  AVLKeyVal[K, V] = tuple[key: K; val: V]
+
 template newNode[K, V](parant: Node[K, V]; k: K; v: V): Node[K, V] =
   Node[K, V](parent: parant, key: k, value: v)
 
@@ -291,7 +293,7 @@ proc len*[K, V](tree: AVLTree[K, V]): int =
   ## Returns the number of items in the tree.
   tree.size
 
-iterator pairs*[K, V](tree: AVLTree[K, V]): (K, V) =
+iterator pairs*[K, V](tree: AVLTree[K, V]): tuple[key: K; val: V] =
   ## Iterates over the elements of the tree in-order.
   var node = tree.root
   var stack: seq[Node[K, V]]
@@ -329,3 +331,60 @@ iterator values*[K, V](tree: AVLTree[K, V]): V =
     else:
       stack.add(node)
       node = node.left
+
+proc count[K, V](node: Node[K, V]): Natural =
+  ## Count the number of nodes in subtree `node`.
+  if node.isNil:
+    0.Natural
+  else:
+    1.Natural + node.left.count + node.right.count
+
+proc select[K, V](node: Node[K, V]; i: int): Node[K, V] =
+  if node.count == 1:
+    node
+  else:
+    let r = node.left.count + 1
+    if i == r:
+      node
+    elif i < r:
+      select(node.left, i)
+    else:
+      select(node.right, r - i)
+
+proc select*[K, V](tree: AVLTree[K, V]; i: Positive): AVLKeyVal[K, V] =
+  ## Returns the `i`'th smallest (zero-indexed) item in `tree`.
+  if tree.root.isNil:
+    raise ValueError.newException "tree is empty"
+  elif tree.root.count < i:
+    raise IndexDefect.newException "bogus index"
+  else:
+    var node = select(tree.root, i)
+    result = (node.key, node.value)
+
+proc rank[K, V](root: Node[K, V]; node: Node[K, V]): Positive =
+  var node = node
+  result = node.left.count + 1
+  while node != root:
+    if node == node.parent.right:
+      result += node.parent.left.count + 1
+    node = node.parent
+
+proc rank[K, V](tree: AVLTree[K, V]; node: Node[K, V]): Positive =
+  ## Returns the position of `node` (one-indexed) in `tree`.
+  if tree.root.isNil:
+    raise ValueError.newException "tree is empty"
+  elif node.isNil:
+    raise ValueError.newException "node is nil"
+  else:
+    result = rank(tree.root, node)
+
+proc rank*[K, V](tree: AVLTree[K, V]; key: K): Positive =
+  ## Returns the position of `node` (one-indexed) in `tree`.
+  if tree.root.isNil:
+    raise ValueError.newException "tree is empty"
+  else:
+    var node = tree.findNode(key)
+    if node.isNil:
+      raise KeyError.newException "not found"
+    else:
+      result = rank(tree.root, node)

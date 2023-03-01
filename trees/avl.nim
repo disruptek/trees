@@ -242,7 +242,7 @@ proc fixRemove[K, V](tree: var AVLTree[K, V], node: Node[K, V]) =
     curr = parent
     parent = curr.parent
 
-template removeImpl(tree: var AVLTree; node: var Node): untyped =
+proc removeImpl(tree: var AVLTree; node: var Node) =
   tree.size -= 1
   if not node.left.isNil and not node.right.isNil:
     # Internal node; the successor's data can be placed here without violating

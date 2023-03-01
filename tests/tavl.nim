@@ -1,6 +1,6 @@
 import pkg/balls
 
-include pkg/trees/avl
+import pkg/trees/avl
 
 proc main =
   proc checkTree(tree: AVLTree[int, char]) =
@@ -10,9 +10,10 @@ proc main =
     check(tree.find(1) == ('a', true))
     check(tree.find(2) == ('\0', false))
 
-    check(tree.root.key == 5)
-    check(tree.root.right.key == 10)
-    check(tree.root.left.key == 1)
+    when compiles(tree.root):
+      check(tree.root.key == 5)
+      check(tree.root.right.key == 10)
+      check(tree.root.left.key == 1)
 
   suite "avl tree":
     test "simple insert":

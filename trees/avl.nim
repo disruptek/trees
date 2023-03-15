@@ -44,6 +44,20 @@ proc max(node: Node): Node =
   while not result.right.isNil:
     result = result.right
 
+proc max*[K, V](tree: AVLTree[K, V]): AVLKeyVal[K, V] =
+  if tree.size == 0:
+    raise ValueError.newException "tree is empty"
+  else:
+    let node = max(tree.root)
+    result = (node.key, node.value)
+
+proc min*[K, V](tree: AVLTree[K, V]): AVLKeyVal[K, V] =
+  if tree.size == 0:
+    raise ValueError.newException "tree is empty"
+  else:
+    let node = min(tree.root)
+    result = (node.key, node.value)
+
 proc succ[K, V](tree: AVLTree[K, V], node: Node[K, V]): Node[K, V] {.used.} =
   ## Returns the successor of the given node, or nil if one doesn't exist.
   if not node.right.isNil:

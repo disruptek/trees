@@ -1,3 +1,7 @@
+import std/algorithm
+import std/random
+import std/sequtils
+
 import pkg/balls
 
 import pkg/trees/avl
@@ -14,6 +18,22 @@ proc main =
       check(tree.root.key == 5)
       check(tree.root.right.key == 10)
       check(tree.root.left.key == 1)
+
+  proc checkOrder(tree: AVLTree[int, int]; x: seq[int]) =
+    let a = tree.keys.toSeq
+    var b = x
+    sort b
+    if a != b:
+      checkpoint " tree: ", a
+      checkpoint "order: ", b
+      var r = newSeqOfCap[int](b.len)
+      for i in 0..b.high:
+        try:
+          r.add tree.rank(b[i])
+        except KeyError:
+          r.add -1
+      checkpoint " rank: ", r
+      fail"tree is out-of-order"
 
   suite "avl tree":
     test "simple insert":
@@ -187,5 +207,42 @@ proc main =
       check 1 == tree.rank(tree.select(1).key)
       check 2 == tree.rank(tree.select(2).key)
       check 3 == tree.rank(tree.select(3).key)
+
+    test "stress in-order":
+      var tree: AVLTree[int, int]
+      const N = 1_000
+      var x = newSeqOfCap[int](N)
+      for i in 0..<N:
+        x.add i
+      var y = x
+      shuffle x
+      for i, n in x.pairs:
+        check tree.insert(n, i)
+        checkOrder(tree, x[0..i])
+      for i, a in y.pairs:
+        check tree.select(i+1).key == a
+        check tree.rank(a) == i+1
+      reverse y
+      var keys = tree.keys.toSeq
+      reverse keys
+      while keys.len > 0:
+        let k = pop keys
+        check k == pop y
+        check tree.remove k
+        checkOrder(tree, y)
+
+    test "stress out-of-order":
+      var tree: AVLTree[int, int]
+      const N = 1_000
+      var x = newSeqOfCap[int](N)
+      for i in 0..<N:
+        x.add i
+      shuffle x
+      for i, n in x.pairs:
+        check tree.insert(n, i)
+      shuffle x
+      while x.len > 0:
+        check tree.remove(pop x)
+        checkOrder(tree, x)
 
 main()

@@ -34,15 +34,40 @@ type
 template newNode[K, V](parant: Node[K, V]; k: K; v: V): Node[K, V] =
   Node[K, V](parent: parant, key: k, value: v)
 
-proc successor[K, V](tree: AVLTree[K, V], node: Node[K, V]): Node[K, V] =
-  ## Returns the successor of the given node, or nil if one doesn't exist.
-  result = node.right
+proc min(node: Node): Node =
+  result = node
+  while not result.left.isNil:
+    result = result.left
+
+proc max(node: Node): Node =
+  result = node
   while not result.right.isNil:
     result = result.right
 
+proc succ[K, V](tree: AVLTree[K, V], node: Node[K, V]): Node[K, V] {.used.} =
+  ## Returns the successor of the given node, or nil if one doesn't exist.
+  if not node.right.isNil:
+    result = min(node.right)
+  else:
+    var node = node
+    result = node.parent
+    while not result.isNil and node == result.right:
+      node = result
+      result = result.parent
+
+proc pred[K, V](tree: AVLTree[K, V], node: Node[K, V]): Node[K, V] {.used.} =
+  if not node.left.isNil:
+    result = max(node.left)
+  else:
+    var node = node
+    result = node.parent
+    while not result.isNil and node == result.left:
+      node = result
+      result = result.parent
+
 proc rotateLeft[K, V](tree: var AVLTree[K, V], parent: Node[K, V]) =
   ## Rotates a tree left around the given node
-  if parent.isNil:
+  if parent.isNil or parent.right.isNil:
     return
   var right = parent.right
   parent.right = right.left
@@ -60,7 +85,7 @@ proc rotateLeft[K, V](tree: var AVLTree[K, V], parent: Node[K, V]) =
 
 proc rotateRight[K, V](tree: var AVLTree[K, V], parent: Node[K, V]) =
   ## Rotates a tree right around the given node
-  if parent.isNil:
+  if parent.isNil or parent.left.isNil:
     return
   var left = parent.left
   parent.left = left.right
@@ -76,14 +101,18 @@ proc rotateRight[K, V](tree: var AVLTree[K, V], parent: Node[K, V]) =
   left.right = parent
   parent.parent = left
 
+proc count[K, V](node: Node[K, V]): Natural =
+  ## Count the number of nodes in subtree `node`.
+  if node.isNil:
+    0.Natural
+  else:
+    1.Natural + node.left.count + node.right.count
+
 proc findNode[K, V](tree: AVLTree[K, V], key: K): Node[K, V] =
   ## Finds a node with the given key, or nil if it doesn't exist.
   result = tree.root
-  while not result.isNil:
-    let comp = cmp(key, result.key)
-    if comp == 0:
-      break
-    elif comp < 0:
+  while not result.isNil and result.key != key:
+    if key < result.key:
       result = result.left
     else:
       result = result.right
@@ -96,7 +125,8 @@ proc fixInsert[K, V](tree: var AVLTree[K, V]; node: Node[K, V]) =
     # Worst case scenario we have to go to the root
     if curr == parent.left:
       # Left child, deal with those rotations
-      if parent.balance == 1:
+      case parent.balance
+      of 1:
         # Old balance factor was 1, and we increased the height of the left
         # subtree, so now it's 2, rebalance needed
         if curr.balance == -1:
@@ -104,17 +134,19 @@ proc fixInsert[K, V](tree: var AVLTree[K, V]; node: Node[K, V]) =
           tree.rotateLeft(curr)
         # Has to be left left case now
         tree.rotateRight(parent)
-        return
-      elif parent.balance == -1:
+        break
+      of -1:
         # Increasing the height of the left subtree balanced this
         parent.balance = 0
-        return
-      # The old balance has to be 0 at this point, tree could need rebalancing
-      # farther up
-      parent.balance = 1
+        break
+      else:
+        # The old balance has to be 0 at this point, tree could need
+        # rebalancing farther up
+        parent.balance = 1
     else:
       # Right child, mirror of above case
-      if parent.balance == -1:
+      case parent.balance
+      of -1:
         # Old balance factor was -1, and we increased the height of the right
         # subtree, so now it's -2, rebalance needed
         if curr.balance == 1:
@@ -122,19 +154,20 @@ proc fixInsert[K, V](tree: var AVLTree[K, V]; node: Node[K, V]) =
           tree.rotateRight(curr)
         # Has to be right right case now
         tree.rotateLeft(parent)
-        return
-      elif parent.balance == 1:
+        break
+      of 1:
         # Increasing the height of the right subtree balanced this
         parent.balance = 0
-        return
-      # The old balance has to be 0 at this point, tree could need rebalancing
-      # farther up
-      parent.balance = -1
+        break
+      else:
+        # The old balance has to be 0 at this point, tree could need
+        # rebalancing farther up
+        parent.balance = -1
     curr = parent
     parent = curr.parent
 
 proc insert*[K, V](tree: var AVLTree[K, V], key: K, value: V): bool {.discardable.} =
-  ## Insert a key value pair into the tree. Returns true if the key didn't
+  ## Insert a key/value pair into the tree. Returns true if the key didn't
   ## already exist in the tree. If the key already existed, the old value
   ## is updated and false is returned.
   if tree.root.isNil:
@@ -202,30 +235,33 @@ proc fixRemove[K, V](tree: var AVLTree[K, V], node: Node[K, V]) =
     # Worst case scenario we have to go to the root
     if curr == parent.right:
       # Right child was removed, deal with those rotations
-      if parent.balance == 1:
+      case parent.balance
+      of 1:
         # Old balance factor was 1, and we decreased the height of the right
         # subtree, so now it's 2, rebalance needed
         let sib = parent.left
-        let sibBalance = if not sib.isNil: sib.balance else: 0
+        let sibBalance = if sib.isNil: 0 else: sib.balance
         if sibBalance == -1:
           # left right case, reduce to left left case
           tree.rotateLeft(sib)
         # Has to be left left case now
         tree.rotateRight(parent)
         if sibBalance == 0:
-          return
-      elif parent.balance == 0:
+          break
+      of 0:
         # Decreasing the height of the right subtree balanced this
         parent.balance = 1
-        return
-      parent.balance = 0
+        break
+      else:
+        parent.balance = 0
     else:
       # Left child was removed, mirror of above case
-      if parent.balance == -1:
+      case parent.balance
+      of -1:
         # Old balance factor was -1, and we decreased the height of the left
         # subtree, now now it's -2, rebalance needed
         let sib = parent.right
-        let sibBalance = if not sib.isNil: sib.balance else: 0
+        let sibBalance = if sib.isNil: 0 else: sib.balance
         if sibBalance == 1:
           # right left case, reduce to right right case
           tree.rotateRight(sib)
@@ -233,27 +269,33 @@ proc fixRemove[K, V](tree: var AVLTree[K, V], node: Node[K, V]) =
         tree.rotateLeft(parent)
         if sibBalance == 0:
           # Decreasing the height of the left subtree balanced this
-          return
-      elif parent.balance == 0:
+          break
+      of 0:
         # Decreasing the height of the left subtree balanced this
         parent.balance = -1
-        return
-      parent.balance = 0
+        break
+      else:
+        parent.balance = 0
     curr = parent
     parent = curr.parent
 
 proc removeImpl(tree: var AVLTree; node: var Node) =
+  ## Remove `node` from `tree`.
   tree.size -= 1
   if not node.left.isNil and not node.right.isNil:
     # Internal node; the successor's data can be placed here without violating
     # BST properties. Now we need to delete the successor
-    let succ = tree.successor(node)
-    node.key = succ.key
-    node.value = succ.value
-    node = succ
+    let next = tree.succ(node)
+    node.key = next.key
+    node.value = next.value
+    node = next
 
   # Now the node we are trying to delete has at most one child
-  let child = if not node.left.isNil: node.left else: node.right
+  let child = if node.left.isNil: node.right else: node.left
+  if not node.left.isNil:
+    doAssert node.right.isNil
+  if not node.right.isNil:
+    doAssert node.left.isNil
   if not child.isNil:
     # Set parent if it exists
     child.parent = node.parent
@@ -268,7 +310,7 @@ proc removeImpl(tree: var AVLTree; node: var Node) =
   tree.fixRemove(child)
 
 proc remove*[K, V](tree: var AVLTree[K, V], key: K): bool {.discardable.} =
-  ## Remove a key value pair from the tree. Returns true if something was
+  ## Remove a key/value pair from the tree. Returns true if something was
   ## removed, false if the key wasn't found, so nothing was removed.
   var node = tree.findNode(key)
   # If a node with that data doesn't exist, nothing to do
@@ -332,16 +374,10 @@ iterator values*[K, V](tree: AVLTree[K, V]): V =
       stack.add(node)
       node = node.left
 
-proc count[K, V](node: Node[K, V]): Natural =
-  ## Count the number of nodes in subtree `node`.
+proc select[K, V](node: Node[K, V]; i: Positive): Node[K, V] =
+  ## Returns the `i`'th smallest (one-indexed) child in `node`.
   if node.isNil:
-    0.Natural
-  else:
-    1.Natural + node.left.count + node.right.count
-
-proc select[K, V](node: Node[K, V]; i: int): Node[K, V] =
-  if node.count == 1:
-    node
+    raise IndexDefect.newException "bogus tree"
   else:
     let r = node.left.count + 1
     if i == r:
@@ -349,19 +385,20 @@ proc select[K, V](node: Node[K, V]; i: int): Node[K, V] =
     elif i < r:
       select(node.left, i)
     else:
-      select(node.right, r - i)
+      select(node.right, i - r)
 
 proc select*[K, V](tree: AVLTree[K, V]; i: Positive): AVLKeyVal[K, V] =
-  ## Returns the `i`'th smallest (zero-indexed) item in `tree`.
+  ## Returns the `i`'th smallest (one-indexed) item in `tree`.
   if tree.root.isNil:
     raise ValueError.newException "tree is empty"
-  elif tree.root.count < i:
+  elif tree.size < i:
     raise IndexDefect.newException "bogus index"
   else:
     var node = select(tree.root, i)
     result = (node.key, node.value)
 
 proc rank[K, V](root: Node[K, V]; node: Node[K, V]): Positive =
+  ## Returns the position of `node` (one-indexed) in `root`.
   var node = node
   result = node.left.count + 1
   while node != root:

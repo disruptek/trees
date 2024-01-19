@@ -1,4 +1,4 @@
-version       = "0.1.4"
+version       = "0.1.5"
 author        = "Brian Shannan <brianshannan@gmail.com>"
 description   = "Implementations of trees in Nim"
 license       = "Apache 2.0"

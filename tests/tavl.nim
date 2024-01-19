@@ -20,7 +20,7 @@ proc main =
       check(tree.root.left.key == 1)
 
   proc checkOrder(tree: AVLTree[int, int]; x: seq[int]) =
-    let a = tree.keys.toSeq
+    let a = toSeq tree.keys
     var b = x
     sort b
     if a != b:
@@ -223,7 +223,7 @@ proc main =
         check tree.select(i+1).key == a
         check tree.rank(a) == i+1
       reverse y
-      var keys = tree.keys.toSeq
+      var keys = toSeq tree.keys
       reverse keys
       while keys.len > 0:
         let k = pop keys

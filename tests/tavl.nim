@@ -208,6 +208,19 @@ proc main =
       check 2 == tree.rank(tree.select(2).key)
       check 3 == tree.rank(tree.select(3).key)
 
+    test "popMin, popMax":
+      var tree: AVLTree[int, char]
+      check tree.insert(5, 'b')
+      check tree.insert(6, 'f')
+      check tree.insert(10, 'c')
+      check tree.insert(1, 'a')
+      check tree.insert(8, 'd')
+      check tree.insert(7, 'e')
+      check tree.popMin() == (1, 'a')
+      check tree.popMin() == (5, 'b')
+      check tree.popMax() == (10, 'c')
+      check tree.popMax() == (8, 'd')
+
     test "stress in-order":
       var tree: AVLTree[int, int]
       const N = 1_000

@@ -24,7 +24,7 @@ type
     value: V
     balance: int
 
-  AVLTree*[K, V] = object
+  AVLTree*[K, V] {.byref.} = object
     ## Object representing an AVL tree
     root: Node[K, V]
     size: int
@@ -223,6 +223,14 @@ proc find*[K, V](tree: AVLTree[K, V], key: K): (V, bool) =
   if not node.isNil:
     result = (node.value, true)
 
+proc find*[K, V](tree: AVLTree[K, V], key: K; value: var V): bool =
+  ## Find and copy the value associated with a given `key`. Returns true
+  ## if the `key` was found and `value` was overwritten; else, false.
+  let node = tree.findNode(key)
+  result = not node.isNil
+  if result:
+    value = node.value
+
 proc contains*[K, V](tree: AVLTree[K, V]; key: K): bool =
   ## Returns `true` if `key` exists in `tree`.
   not tree.findNode(key).isNil
@@ -293,7 +301,7 @@ proc fixRemove[K, V](tree: var AVLTree[K, V], node: Node[K, V]) =
     curr = parent
     parent = curr.parent
 
-proc removeImpl(tree: var AVLTree; node: var Node) =
+proc remove(tree: var AVLTree; node: var Node) =
   ## Remove `node` from `tree`.
   tree.size -= 1
   if not node.left.isNil and not node.right.isNil:
@@ -307,9 +315,9 @@ proc removeImpl(tree: var AVLTree; node: var Node) =
   # Now the node we are trying to delete has at most one child
   let child = if node.left.isNil: node.right else: node.left
   if not node.left.isNil:
-    doAssert node.right.isNil
+    assert node.right.isNil
   if not node.right.isNil:
-    doAssert node.left.isNil
+    assert node.left.isNil
   if not child.isNil:
     # Set parent if it exists
     child.parent = node.parent
@@ -330,7 +338,7 @@ proc remove*[K, V](tree: var AVLTree[K, V], key: K): bool {.discardable.} =
   # If a node with that data doesn't exist, nothing to do
   result = not node.isNil
   if result:
-    removeImpl(tree, node)
+    remove(tree, node)
 
 proc del*[K, V](tree: var AVLTree[K, V], key: K) =
   discard remove(tree, key)
@@ -343,7 +351,7 @@ proc pop*[K, V](tree: var AVLTree[K, V], key: K): V {.discardable.} =
     raise KeyError.newException "not found"
   else:
     result = move node.value
-    removeImpl(tree, node)
+    remove(tree, node)
 
 proc len*[K, V](tree: AVLTree[K, V]): int =
   ## Returns the number of items in the tree.
@@ -439,3 +447,23 @@ proc rank*[K, V](tree: AVLTree[K, V]; key: K): Positive =
       raise KeyError.newException "not found"
     else:
       result = rank(tree.root, node)
+
+proc popMin*[K, V](tree: var AVLTree[K, V]): AVLKeyVal[K, V] {.discardable.} =
+  ## Removes and returns the smallest key/value pair in `tree`.
+  if tree.root.isNil or tree.size == 0:
+    raise ValueError.newException "tree is empty"
+  else:
+    var node = min(tree.root)
+    result.key = move node.key
+    result.val = move node.value
+    remove(tree, node)
+
+proc popMax*[K, V](tree: var AVLTree[K, V]): AVLKeyVal[K, V] {.discardable.} =
+  ## Removes and returns the largest key/value pair in `tree`.
+  if tree.root.isNil or tree.size == 0:
+    raise ValueError.newException "tree is empty"
+  else:
+    var node = max(tree.root)
+    result.key = move node.key
+    result.val = move node.value
+    remove(tree, node)

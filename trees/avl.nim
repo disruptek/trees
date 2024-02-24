@@ -31,9 +31,6 @@ type
 
   AVLKeyVal[K, V] = tuple[key: K; val: V]
 
-template newNode[K, V](parant: Node[K, V]; k: K; v: V): Node[K, V] =
-  Node[K, V](parent: parant, key: k, value: v)
-
 proc min(node: Node): Node =
   result = node
   while not result.left.isNil:
@@ -180,12 +177,12 @@ proc fixInsert[K, V](tree: var AVLTree[K, V]; node: Node[K, V]) =
     curr = parent
     parent = curr.parent
 
-proc insert*[K, V](tree: var AVLTree[K, V], key: K, value: V): bool {.discardable.} =
+proc insert*[K, V](tree: var AVLTree[K, V], key: sink K, value: sink V): bool {.discardable.} =
   ## Insert a key/value pair into the tree. Returns true if the key didn't
   ## already exist in the tree. If the key already existed, the old value
   ## is updated and false is returned.
   if tree.root.isNil:
-    tree.root = newNode[K, V](nil, key, value)
+    tree.root = Node[K, V](key: key, value: value)
     tree.size += 1
     return true
 
@@ -200,7 +197,7 @@ proc insert*[K, V](tree: var AVLTree[K, V], key: K, value: V): bool {.discardabl
       # Go to the left
       if curr.left.isNil:
         # It's not there, insert and fix tree
-        curr.left = newNode[K, V](curr, key, value)
+        curr.left = Node[K, V](parent: curr, key: key, value: value)
         tree.size += 1
         tree.fixInsert(curr.left)
         return true
@@ -209,7 +206,7 @@ proc insert*[K, V](tree: var AVLTree[K, V], key: K, value: V): bool {.discardabl
       # Go to the right
       if curr.right.isNil:
         # It's not there, insert and fix tree
-        curr.right = newNode[K, V](curr, key, value)
+        curr.right = Node[K, V](parent: curr, key: key, value: value)
         tree.size += 1
         tree.fixInsert(curr.right)
         return true

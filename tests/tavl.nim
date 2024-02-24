@@ -257,5 +257,7 @@ proc main =
       while x.len > 0:
         check tree.remove(pop x)
         checkOrder(tree, x)
+      reset tree
+      check tree.len == 0
 
 main()

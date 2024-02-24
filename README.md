@@ -89,7 +89,7 @@ are Nim `func` -- no side effects. A BBTree may be shared across threads safely
 (though updates in one thread will not be visible in another until the modified
 tree is shared once again).
 
-## BBTree Credits
+### BBTree Credits
 
 References:
 

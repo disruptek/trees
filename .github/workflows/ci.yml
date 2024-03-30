@@ -60,8 +60,8 @@ jobs:
         compiler:
           - name: nim
             version: devel
-          - name: nimskull
-            version: "*"
+#          - name: nimskull
+#            version: "*"
 
     name: '${{ matrix.os }} (${{ matrix.compiler.name }} ${{ matrix.compiler.version }})'
     runs-on: ${{ matrix.os }}

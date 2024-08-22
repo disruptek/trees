@@ -59,9 +59,9 @@ jobs:
         os: [ubuntu-latest]
         compiler:
           - name: nim
-            version: devel
-#          - name: nimskull
-#            version: "*"
+            version: ['devel', 'version-2-0']
+          - name: nimskull
+            version: "*"
 
     name: '${{ matrix.os }} (${{ matrix.compiler.name }} ${{ matrix.compiler.version }})'
     runs-on: ${{ matrix.os }}
@@ -87,7 +87,7 @@ jobs:
       - name: Nimskull
         id: nimskull
         if: matrix.compiler.name == 'nimskull'
-        uses: nim-works/setup-nimskull@0.1.0
+        uses: nim-works/setup-nimskull@0.1.2
         with:
           nimskull-version: ${{ matrix.compiler.version }}
 

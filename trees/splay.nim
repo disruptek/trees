@@ -19,7 +19,7 @@
 
 type
   Node[K, V] = ref object
-    parent: Node[K, V]
+    parent {.cursor.}: Node[K, V]
     left: Node[K, V]
     right: Node[K, V]
     key: K
@@ -38,7 +38,7 @@ proc rotateLeft[K, V](tree: var SplayTree[K, V], node: Node[K, V]) =
     return
   var our = move node.right
   # we take the node's parent
-  our.parent = move node.parent
+  our.parent = node.parent
   # our left node becomes node's right branch
   node.right = move our.left
   if not node.right.isNil:
@@ -66,7 +66,7 @@ proc rotateRight[K, V](tree: var SplayTree[K, V], node: Node[K, V]) =
 
   var our = move node.left
   # we take the node's parent
-  our.parent = move node.parent
+  our.parent = node.parent
   # our right node becomes node's left branch
   node.left = move our.right
   if not node.left.isNil:

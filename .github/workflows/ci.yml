@@ -59,8 +59,6 @@ jobs:
         os: [ubuntu-latest]
         compiler:
           - name: nim
-            version: devel
-          - name: nim
             version: version-2-0
           - name: nimskull
             version: "*"

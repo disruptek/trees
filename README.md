@@ -2,7 +2,7 @@
 
 [![Test Matrix](https://github.com/disruptek/trees/workflows/CI/badge.svg)](https://github.com/disruptek/trees/actions?query=workflow%3ACI)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/disruptek/trees?style=flat)](https://github.com/disruptek/trees/releases/latest)
-![Minimum supported Nim version](https://img.shields.io/badge/nim-1.9.1-informational?style=flat&logo=nim)
+![Supported Nim version](https://img.shields.io/badge/nim-2.0.10-informational?style=flat&logo=nim)
 [![License](https://img.shields.io/github/license/disruptek/trees?style=flat)](#license)
 [![IRC](https://img.shields.io/badge/chat-%23%23disruptek%20on%20libera.chat-brightgreen?style=flat)](https://web.libera.chat/##disruptek)
 

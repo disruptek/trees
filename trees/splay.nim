@@ -1,4 +1,4 @@
-## Implementation of an AVL tree in Nim, based on
+## Implementation of a Splay tree in Nim, based on
 ## https://en.wikipedia.org/wiki/Splay_tree.
 ## Recursive iterators aren't allowed in nim, so iterative tree traversals were
 ## needed, found on wikipedia as well.

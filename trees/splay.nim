@@ -63,7 +63,6 @@ proc rotateRight[K, V](tree: var SplayTree[K, V], node: Node[K, V]) =
   ## Rotates a tree right around the given node.
   if node.isNil:
     return
-
   var our = move node.left
   # we take the node's parent
   our.parent = node.parent

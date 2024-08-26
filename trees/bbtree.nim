@@ -1,19 +1,19 @@
 #[
 Copyright (c) 2012-18 Doug Currie, Londonderry, NH, USA
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
-and associated documentation files (the "Software"), to deal in the Software without 
-restriction, including without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
 Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or 
+The above copyright notice and this permission notice shall be included in all copies or
 substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
-BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]#
 
@@ -32,7 +32,7 @@ Department of Applied Mathematics Charles University in Prague, Czech Republic
 ]#
 
 ## Bounded Balance Trees a.k.a. Weight Balanced Trees
-## 
+##
 ## a persistent data structure providing a generic (parameterized) key,value map
 ##
 ## * Insert (``add``), lookup (``get``), and delete (``del``) in O(log(N)) time
@@ -96,15 +96,15 @@ balance left key right
 
 func singleL[K,V](left: BBTree[K,V], key: K, value: V, right: BBTree[K,V]): BBTree[K,V] =
     result = newNode(newNode(left, key, value, right.left),
-                        right.key, 
-                        right.val, 
+                        right.key,
+                        right.val,
                         right.right)
 
 func doubleL[K,V](left: BBTree[K,V], key: K, value: V, right: BBTree[K,V]): BBTree[K,V] =
     let rl = right.left
     result = newNode(newNode(left, key, value, rl.left),
-                     rl.key, 
-                     rl.val, 
+                     rl.key,
+                     rl.val,
                      newNode(rl.right, right.key, right.val, right.right))
 
 
@@ -175,7 +175,7 @@ func add*[K,V](root: BBTree[K,V], key: K, value: V): BBTree[K,V] =
 # default is returned is key is not in tree
 #
 func get*[K,V](root: BBTree[K,V], key: K, default: V): V =
-    ## Retrieves the value for `key` in the tree `root` iff `key` is in the tree. 
+    ## Retrieves the value for `key` in the tree `root` iff `key` is in the tree.
     ## Otherwise, `default` is returned. O(log N)
     result = default
     var node = root
@@ -190,8 +190,8 @@ func get*[K,V](root: BBTree[K,V], key: K, default: V): V =
             node = nil # break
 
 func getNth*[K,V](root: BBTree[K,V], index: int, default: (K, V)): (K, V) =
-    ## Get the key,value pair of the 0-based `index` key in the tree `root` when index is 
-    ## positive and less than the tree length. Or get the tree length plus `index` key in 
+    ## Get the key,value pair of the 0-based `index` key in the tree `root` when index is
+    ## positive and less than the tree length. Or get the tree length plus `index` key in
     ## the tree `root` when the `index` is negative and greater than the negative tree length.
     ## Otherwise, `default` is returned. O(log N)
     result = default
@@ -383,7 +383,7 @@ func delMax*[K,V](root: BBTree[K,V]): BBTree[K,V] =
 ]#
 
 func rank*[K,V](root: BBTree[K,V], key: K, default: int): int =
-    ## Retrieves the 0-based index of `key` in the tree `root` iff `key` is in the tree. 
+    ## Retrieves the 0-based index of `key` in the tree `root` iff `key` is in the tree.
     ## Otherwise, `default` is returned. O(log N)
     result = default
     var n = 0
@@ -418,7 +418,7 @@ iterator preorder*[K,V](root: BBTree[K,V]): (K,V) =
 
 iterator inorder*[K,V](root: BBTree[K,V]): (K,V) =
     ## Inorder traversal of the tree at `root`, i.e., from smallest to largest key
-    # Since recursive iterators are not yet implemented, this uses an explicit stack 
+    # Since recursive iterators are not yet implemented, this uses an explicit stack
     var stack: seq[BBTree[K,V]] = @[]
     var curr = root
     while (not curr.isNil) or stack.len > 0:
@@ -454,9 +454,9 @@ proc fold*[K,V,T](root: BBTree[K,V], f: proc (key: K, val: V, base: T): T, base:
     ## Applies the proc `f` to each value of tree `root` in reverse order (right to left).
     ## Uses the `base` value for the first rightmost operand. So, for example, to construct a
     ## concatenated string of stringified tree values, you could use
-    ## 
+    ##
     ## .. code-block::
-    ## 
+    ##
     ##     fold(root, proc (k: int, v: int, b: string): string = discard k; $v & ";" &  b, "")
     # Use explicit stack sice we have the logic from `revorder` above
     var stack: seq[BBTree[K,V]] = @[]
@@ -472,12 +472,12 @@ proc fold*[K,V,T](root: BBTree[K,V], f: proc (key: K, val: V, base: T): T, base:
         curr = curr.left # now go left
 
 func map*[K,V,T](root: BBTree[K,V], f: proc (key: K, val: V): T {.noSideEffect.}): BBTree[K,T] =
-    ## Returns a new tree with the keys of tree `root` and values that are the result of 
+    ## Returns a new tree with the keys of tree `root` and values that are the result of
     ## applying `f` to each key and corresponding value. So, for example, to construct a
     ## tree with values replaced by concatenated string of key,value pairs, you could use
-    ## 
+    ##
     ## .. code-block::
-    ## 
+    ##
     ##     map(root, proc (k: int, v: int): string = $k & ":" & $v)
     if root.isNil:
         result = nil
@@ -531,7 +531,7 @@ func split[K,V](key: K, root: BBTree[K,V]): (BBTree[K,V], bool, BBTree[K,V]) =
         else: # key and node.key are eq
             result = (root.left, true, root.right)
 
-func splitMerge[K,V](key: K, val: V, root: BBTree[K,V], merge: proc (k: K, v1, v2: V): V {.noSideEffect.}): 
+func splitMerge[K,V](key: K, val: V, root: BBTree[K,V], merge: proc (k: K, v1, v2: V): V {.noSideEffect.}):
     (BBTree[K,V], bool, V, BBTree[K,V]) =
     if root.isNil:
         result = (root, false, val, root)
@@ -550,9 +550,9 @@ func union*[K,V](tree1, tree2: BBTree[K,V]): BBTree[K,V] =
     ## Returns the union of the sets represented by the keys in `tree1` and `tree2`.
     ## When viewed as maps, returns the key,value pairs that appear in either tree; if
     ## a key appears in both trees, the value for that key is selected from `tree1`, so
-    ## this function is asymmetrical for maps. If you need more comtrol over how the 
+    ## this function is asymmetrical for maps. If you need more comtrol over how the
     ## values are selected for duplicate keys, see `unionMerge`. O(M + N) but if the minimum
-    ## key of one tree is greater than the maximum key of the other tree then O(log M) 
+    ## key of one tree is greater than the maximum key of the other tree then O(log M)
     ## where M is the size of the larger tree.
     if tree1.isNil:
         result = tree2
@@ -567,9 +567,9 @@ func unionMerge*[K,V](tree1, tree2: BBTree[K,V], merge: proc (k: K, v1, v2: V): 
     ## Returns the union of the sets represented by the keys in `tree1` and `tree2`.
     ## When viewed as maps, returns the key,value pairs that appear in either tree; if
     ## a key appears in both trees, the value for that key is the result of the supplied
-    ## `merge` function, which is passed the common key, and the values from `tree1` and 
+    ## `merge` function, which is passed the common key, and the values from `tree1` and
     ## `tree2` respectively.  O(M + N) but if the minimum
-    ## key of one tree is greater than the maximum key of the other tree then O(log M) 
+    ## key of one tree is greater than the maximum key of the other tree then O(log M)
     ## where M is the size of the larger tree.
     if tree1.isNil:
         result = tree2
@@ -581,7 +581,7 @@ func unionMerge*[K,V](tree1, tree2: BBTree[K,V], merge: proc (k: K, v1, v2: V): 
         result = join(tree1.key, v, unionMerge(tree1.left, l, merge), unionMerge(tree1.right, r, merge))
 
 func difference*[K,V](tree1, tree2: BBTree[K,V]): BBTree[K,V] =
-    ## Returns the asymmetric set difference between `tree1` and `tree2`. In other words, 
+    ## Returns the asymmetric set difference between `tree1` and `tree2`. In other words,
     ## returns the keys that are in `tree1`, but not in `tree2`.  O(M + N)
     if tree1.isNil or tree2.isNil:
         result = tree1
@@ -591,8 +591,8 @@ func difference*[K,V](tree1, tree2: BBTree[K,V]): BBTree[K,V] =
         result = join(difference(l, tree2.left), difference(r, tree2.right))
 
 func symmetricDifference*[K,V](tree1, tree2: BBTree[K,V]): BBTree[K,V] =
-    ## Returns the symmetric set difference between `tree1` and `tree2`. In other words, 
-    ## returns the keys that are in `tree1`, but not in `tree2`, union the keys that are in 
+    ## Returns the symmetric set difference between `tree1` and `tree2`. In other words,
+    ## returns the keys that are in `tree1`, but not in `tree2`, union the keys that are in
     ## `tree2` but not in `tree1`.  O(M + N)
     if tree1.isNil:
         result = tree2
@@ -622,10 +622,10 @@ func contains*[K,V](root: BBTree[K,V], key: K): bool =
 
 func intersection*[K,V](tree1, tree2: BBTree[K,V]): BBTree[K,V] =
     ## Returns the set intersection of `tree1` and `tree2`. In other words, returns the keys
-    ## that are in both trees. 
-    ## When viewed as maps, returns the key,value pairs for keys that appear in both trees; 
+    ## that are in both trees.
+    ## When viewed as maps, returns the key,value pairs for keys that appear in both trees;
     ## the value each key is selected from `tree1`, so
-    ## this function is asymmetrical for maps. If you need more comtrol over how the 
+    ## this function is asymmetrical for maps. If you need more comtrol over how the
     ## values are selected for duplicate keys, see `uintersectionMerge`. O(M + N)
     if tree1.isNil:
         result = tree1
@@ -640,10 +640,10 @@ func intersection*[K,V](tree1, tree2: BBTree[K,V]): BBTree[K,V] =
 
 func intersectionMerge*[K,V](tree1, tree2: BBTree[K,V], merge: proc (k: K, v1, v2: V): V {.noSideEffect.}): BBTree[K,V] =
     ## Returns the set intersection of `tree1` and `tree2`. In other words, returns the keys
-    ## that are in both trees. 
-    ## When viewed as maps, returns the key,value pairs for keys that appear in both trees; 
+    ## that are in both trees.
+    ## When viewed as maps, returns the key,value pairs for keys that appear in both trees;
     ## the value for each key is the result of the supplied
-    ## `merge` function, which is passed the common key, and the values from `tree1` and 
+    ## `merge` function, which is passed the common key, and the values from `tree1` and
     ## `tree2` respectively.  O(M + N)
     if tree1.isNil:
         result = tree1
@@ -657,7 +657,7 @@ func intersectionMerge*[K,V](tree1, tree2: BBTree[K,V], merge: proc (k: K, v1, v
             result = join(intersectionMerge(tree1.left, l, merge), intersectionMerge(tree1.right, r, merge))
 
 func isSubset*[K,U,V](tree1: BBTree[K,U], tree2: BBTree[K,V]): bool =
-    ## Returns true iff the keys in `tree1` form a subset of the keys in `tree2`. In other words, 
+    ## Returns true iff the keys in `tree1` form a subset of the keys in `tree2`. In other words,
     ## if all the keys that are in `tree1` are also in `tree2`. O(N) where N is `len(tree1)`
     ## Use `isProperSubset` instead to determins that there are keys in `tree2` that are not in `tree1`.
     if tree1.isNil:
@@ -673,7 +673,7 @@ func isSubset*[K,U,V](tree1: BBTree[K,U], tree2: BBTree[K,V]): bool =
                      isSubset(tree1.right, tree2)
         elif dif > 0:
             result = isSubset(tree1.right, tree2.right) and
-                     tree2.contains(tree1.key) and 
+                     tree2.contains(tree1.key) and
                      isSubset(tree1.left, tree2)
         else: # tree1.key and tree2.key are eq
             result = isSubset(tree1.left, tree2.left) and isSubset(tree1.right, tree2.right)
@@ -690,14 +690,14 @@ func disjoint*[K,V](tree1, tree2: BBTree[K,V]): bool =
             return disjoint(tree1.right, tree2)
         elif dif > 0:
             if not disjoint(tree1.right, tree2.right): return false
-            if tree2.contains(tree1.key): return false 
+            if tree2.contains(tree1.key): return false
             return disjoint(tree1.left, tree2)
         else: # tree1.key and tree2.key are eq
             return false
 
 func isProperSubset*[K,U,V](tree1: BBTree[K,U], tree2: BBTree[K,V]): bool =
-    ## Returns true iff the keys in `tree1` form a proper subset of the keys in `tree2`. 
-    ## In other words, if all the keys that are in `tree1` are also in `tree2`, but there are 
+    ## Returns true iff the keys in `tree1` form a proper subset of the keys in `tree2`.
+    ## In other words, if all the keys that are in `tree1` are also in `tree2`, but there are
     ## keys in `tree2` that are not in `tree1`.  O(N) where N is `len(tree1)`
     result = isSubset(tree1, tree2) and len(tree1) < len(tree2)
 

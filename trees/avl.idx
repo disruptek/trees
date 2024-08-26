@@ -1,0 +1,22 @@
+nimTitle	avl	trees/avl.html	module trees/avl		0
+nim	AVLTree	trees/avl.html#AVLTree	object AVLTree		27
+nim	max	trees/avl.html#max,AVLTree[K,V]	proc max[K, V](tree: AVLTree[K, V]): AVLKeyVal[K, V]		44
+nim	min	trees/avl.html#min,AVLTree[K,V]	proc min[K, V](tree: AVLTree[K, V]): AVLKeyVal[K, V]		51
+nim	insert	trees/avl.html#insert,AVLTree[K,V],sinkK,sinkV	proc insert[K, V](tree: var AVLTree[K, V]; key: sink K; value: sink V): bool		180
+nim	find	trees/avl.html#find,AVLTree[K,V],K	proc find[K, V](tree: AVLTree[K, V]; key: K): (V, bool)		216
+nim	find	trees/avl.html#find,AVLTree[K,V],K,V	proc find[K, V](tree: AVLTree[K, V]; key: K; value: var V): bool		223
+nim	contains	trees/avl.html#contains,AVLTree[K,V],K	proc contains[K, V](tree: AVLTree[K, V]; key: K): bool		231
+nim	`[]=`	trees/avl.html#[]=,AVLTree[K,V],K,V	proc `[]=`[K, V](tree: var AVLTree[K, V]; key: K; value: V)		235
+nim	`[]`	trees/avl.html#[],AVLTree[K,V],K	proc `[]`[K, V](tree: AVLTree[K, V]; key: K): var V		239
+nim	remove	trees/avl.html#remove,AVLTree[K,V],K	proc remove[K, V](tree: var AVLTree[K, V]; key: K): bool		331
+nim	del	trees/avl.html#del,AVLTree[K,V],K	proc del[K, V](tree: var AVLTree[K, V]; key: K)		340
+nim	pop	trees/avl.html#pop,AVLTree[K,V],K	proc pop[K, V](tree: var AVLTree[K, V]; key: K): V		343
+nim	len	trees/avl.html#len,AVLTree[K,V]	proc len[K, V](tree: AVLTree[K, V]): int		353
+nim	pairs	trees/avl.html#pairs.i,AVLTree[K,V]	iterator pairs[K, V](tree: AVLTree[K, V]): tuple[key: K, val: V]		357
+nim	keys	trees/avl.html#keys.i,AVLTree[K,V]	iterator keys[K, V](tree: AVLTree[K, V]): K		370
+nim	values	trees/avl.html#values.i,AVLTree[K,V]	iterator values[K, V](tree: AVLTree[K, V]): V		383
+nim	select	trees/avl.html#select,AVLTree[K,V],Positive	proc select[K, V](tree: AVLTree[K, V]; i: Positive): AVLKeyVal[K, V]		409
+nim	rank	trees/avl.html#rank,AVLTree[K,V],K	proc rank[K, V](tree: AVLTree[K, V]; key: K): Positive		437
+nim	popMin	trees/avl.html#popMin,AVLTree[K,V]	proc popMin[K, V](tree: var AVLTree[K, V]): AVLKeyVal[K, V]		448
+nim	popMax	trees/avl.html#popMax,AVLTree[K,V]	proc popMax[K, V](tree: var AVLTree[K, V]): AVLKeyVal[K, V]		458
+nimgrp	find	trees/avl.html#find-procs-all	proc		216

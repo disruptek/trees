@@ -1,0 +1,9 @@
+nimTitle	splay	trees/splay.html	module trees/splay		0
+nim	SplayTree	trees/splay.html#SplayTree	object SplayTree		28
+nim	find	trees/splay.html#find,SplayTree[K,V],K,V	proc find[K, V](tree: SplayTree[K, V]; key: K; value: var V): bool		132
+nim	find	trees/splay.html#find,SplayTree[K,V],K,V_2	proc find[K, V](tree: var SplayTree[K, V]; key: K; value: var V): bool		141
+nim	insert	trees/splay.html#insert,SplayTree[K,V],K,V	proc insert[K, V](tree: var SplayTree[K, V]; key: K; value: V): bool		154
+nim	remove	trees/splay.html#remove,SplayTree[K,V],K	proc remove[K, V](tree: var SplayTree[K, V]; key: K): bool		199
+nim	len	trees/splay.html#len,SplayTree[K,V]	proc len[K, V](tree: SplayTree[K, V]): int		238
+nim	pairs	trees/splay.html#pairs.i,SplayTree[K,V]	iterator pairs[K, V](tree: SplayTree[K, V]): (K, V)		242
+nimgrp	find	trees/splay.html#find-procs-all	proc		132

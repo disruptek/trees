@@ -1,0 +1,8 @@
+nimTitle	redblack	trees/redblack.html	module trees/redblack		0
+nim	RedBlackTree	trees/redblack.html#RedBlackTree	type RedBlackTree		31
+nim	newRedBlackTree	trees/redblack.html#newRedBlackTree	proc newRedBlackTree[K, V](): RedBlackTree[K, V]		40
+nim	insert	trees/redblack.html#insert,RedBlackTree[K,V],K,V	proc insert[K, V](tree: RedBlackTree[K, V]; key: K; value: V): bool		141
+nim	find	trees/redblack.html#find,RedBlackTree[K,V],K	proc find[K, V](tree: RedBlackTree[K, V]; key: K): (V, bool)		180
+nim	remove	trees/redblack.html#remove,RedBlackTree[K,V],K	proc remove[K, V](tree: RedBlackTree[K, V]; key: K): bool		240
+nim	len	trees/redblack.html#len,RedBlackTree[K,V]	proc len[K, V](tree: RedBlackTree[K, V]): int		273
+nim	iterOrder	trees/redblack.html#iterOrder.i,RedBlackTree[K,V]	iterator iterOrder[K, V](tree: RedBlackTree[K, V]): (K, V)		277

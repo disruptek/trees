@@ -550,7 +550,7 @@ func union*[K,V](tree1, tree2: BBTree[K,V]): BBTree[K,V] =
     ## Returns the union of the sets represented by the keys in `tree1` and `tree2`.
     ## When viewed as maps, returns the key,value pairs that appear in either tree; if
     ## a key appears in both trees, the value for that key is selected from `tree1`, so
-    ## this function is asymmetrical for maps. If you need more comtrol over how the
+    ## this function is asymmetrical for maps. If you need more control over how the
     ## values are selected for duplicate keys, see `unionMerge`. O(M + N) but if the minimum
     ## key of one tree is greater than the maximum key of the other tree then O(log M)
     ## where M is the size of the larger tree.
@@ -625,7 +625,7 @@ func intersection*[K,V](tree1, tree2: BBTree[K,V]): BBTree[K,V] =
     ## that are in both trees.
     ## When viewed as maps, returns the key,value pairs for keys that appear in both trees;
     ## the value each key is selected from `tree1`, so
-    ## this function is asymmetrical for maps. If you need more comtrol over how the
+    ## this function is asymmetrical for maps. If you need more control over how the
     ## values are selected for duplicate keys, see `uintersectionMerge`. O(M + N)
     if tree1.isNil:
         result = tree1

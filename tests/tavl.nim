@@ -223,12 +223,13 @@ proc main =
 
     test "stress in-order":
       var tree: AVLTree[int, int]
+      var rng = initRand(0x12345678)
       const N = 1_000
       var x = newSeqOfCap[int](N)
       for i in 0..<N:
         x.add i
       var y = x
-      shuffle x
+      shuffle(rng, x)
       for i, n in x.pairs:
         check tree.insert(n, i)
         checkOrder(tree, x[0..i])
@@ -246,14 +247,15 @@ proc main =
 
     test "stress out-of-order":
       var tree: AVLTree[int, int]
+      var rng = initRand(0x87654321)
       const N = 1_000
       var x = newSeqOfCap[int](N)
       for i in 0..<N:
         x.add i
-      shuffle x
+      shuffle(rng, x)
       for i, n in x.pairs:
         check tree.insert(n, i)
-      shuffle x
+      shuffle(rng, x)
       while x.len > 0:
         check tree.remove(pop x)
         checkOrder(tree, x)

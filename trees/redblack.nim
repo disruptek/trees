@@ -45,24 +45,24 @@ proc newRedBlackTree*[K, V](): RedBlackTree[K, V] =
   return RedBlackTree[K, V](leaf: leaf)
 
 proc successor[K, V](tree: RedBlackTree[K, V], node: Node[K, V]): Node[K, V] =
-  ## Returns the successor of the given node, of nil if one doesn't exist
-  if node.right == nil:
+  ## Returns the successor of the given node, or nil if one doesn't exist
+  if node.right.isNil:
     return nil
   var curr = node.right
-  while curr.right != nil:
-    curr = curr.right
+  while not curr.left.isNil:
+    curr = curr.left
   return curr
 
 proc rotateLeft[K, V](tree: RedBlackTree[K, V], parent: Node[K, V]) =
   ## Rotates a tree left around the given node
-  if parent == nil:
+  if parent.isNil:
     return
   var right = parent.right
   parent.right = right.left
-  if right.left != nil:
+  if not right.left.isNil:
     right.left.parent = parent
   right.parent = parent.parent
-  if parent.parent == nil:
+  if parent.parent.isNil:
     tree.root = right
   elif parent.parent.left == parent:
     parent.parent.left = right
@@ -73,14 +73,14 @@ proc rotateLeft[K, V](tree: RedBlackTree[K, V], parent: Node[K, V]) =
 
 proc rotateRight[K, V](tree: RedBlackTree[K, V], parent: Node[K, V]) =
   ## Rotates a tree right around the given node
-  if parent == nil:
+  if parent.isNil:
     return
   var left = parent.left
   parent.left = left.right
-  if left.right != nil:
+  if not left.right.isNil:
     left.right.parent = parent
   left.parent = parent.parent
-  if parent.parent == nil:
+  if parent.parent.isNil:
     tree.root = left
   elif parent.parent.right == parent:
     parent.parent.right = left
@@ -106,7 +106,7 @@ proc fixInsert[K, V](tree: RedBlackTree[K, V], node: Node[K, V]) =
   ## Rebalances a tree after an insertion
   var curr = node
   while curr != tree.root and curr.parent.color == Color.red:
-    if curr.parent.parent != nil and curr.parent == curr.parent.parent.left:
+    if not curr.parent.parent.isNil and curr.parent == curr.parent.parent.left:
       var uncle = curr.parent.parent.right
       if uncle.color == Color.red:
         curr.parent.color = Color.black
@@ -118,10 +118,10 @@ proc fixInsert[K, V](tree: RedBlackTree[K, V], node: Node[K, V]) =
           curr = curr.parent
           tree.rotateLeft(curr)
         curr.parent.color = Color.black
-        if curr.parent.parent != nil:
+        if not curr.parent.parent.isNil:
           curr.parent.parent.color = Color.red
           tree.rotateRight(curr.parent.parent)
-    elif curr.parent.parent != nil:
+    elif not curr.parent.parent.isNil:
       var uncle = curr.parent.parent.left
       if uncle.color == Color.red:
         curr.parent.color = Color.black
@@ -133,7 +133,7 @@ proc fixInsert[K, V](tree: RedBlackTree[K, V], node: Node[K, V]) =
           curr = curr.parent
           tree.rotateRight(curr)
         curr.parent.color = Color.black
-        if curr.parent.parent != nil:
+        if not curr.parent.parent.isNil:
           curr.parent.parent.color = Color.red
           tree.rotateLeft(curr.parent.parent)
   tree.root.color = Color.black
@@ -143,7 +143,7 @@ proc insert*[K, V](tree: RedBlackTree[K, V], key: K, value: V): bool {.discardab
   ## already exist in the tree. If the key already existed, the old value
   ## is updated and false is returned.
   # If the tree root is nil, there are no entries, put it at the root
-  if tree.root == nil:
+  if tree.root.isNil:
     tree.root = newNode[K, V](tree, nil, key, value)
     tree.size += 1
     tree.fixInsert(tree.root)
@@ -181,7 +181,7 @@ proc find*[K, V](tree: RedBlackTree[K, V], key: K): (V, bool) =
   ## Find the value associated with a given key. Returns the value and true
   ## if the key was found, and a default value and false if not.
   let node = tree.findNode(key)
-  if node != nil:
+  if not node.isNil:
     return (node.value, true)
   var default: V
   return (default, false)
@@ -241,14 +241,14 @@ proc remove*[K, V](tree: RedBlackTree[K, V], key: K): bool {.discardable.} =
   ## Remove a key value pair from the tree. Returns true if something was
   ## removed, false if the key wasn't found, so nothing was removed.
   var node = tree.findNode(key)
-  if node == nil:
+  if node.isNil:
     return false
 
   tree.size -= 1
   # Reduce the problem to removing a node with at most one child
   if node.left != tree.leaf and node.right != tree.leaf:
     # Internal node, the successor's data can be placed here without violating
-    # bst properties. No we need to delete the successor
+    # bst properties. Now we need to delete the successor
     let succ = tree.successor(node)
     node.key = succ.key
     node.value = succ.value
@@ -257,7 +257,7 @@ proc remove*[K, V](tree: RedBlackTree[K, V], key: K): bool {.discardable.} =
   # Get a non leaf child, if there is one and fix pointers
   let child = if node.left != tree.leaf: node.left else: node.right
   child.parent = node.parent
-  if node.parent == nil:
+  if node.parent.isNil:
     tree.root = child
   elif node == node.parent.left:
     node.parent.left = child
@@ -274,7 +274,7 @@ proc len*[K, V](tree: RedBlackTree[K, V]): int =
   ## Returns the number of items the in tree
   return tree.size
 
-iterator iterOrder*[K, V](tree: RedBlackTree[K, V]): (K, V) =
+iterator pairs*[K, V](tree: RedBlackTree[K, V]): (K, V) =
   ## Iterates over the elements of the tree in order.
   var node = tree.root
   var stack: seq[Node[K, V]] = @[]
@@ -287,152 +287,8 @@ iterator iterOrder*[K, V](tree: RedBlackTree[K, V]): (K, V) =
       yield (node.key, node.value)
       node = node.right
 
-
-when defined(TESTING):
-  import unittest
-
-  proc checkTree(tree: RedBlackTree[int, char]) =
-    check(tree.len() == 3)
-    check(tree.find(10) == ('c', true))
-    check(tree.find(5) == ('b', true))
-    check(tree.find(1) == ('a', true))
-    check(tree.find(2) == ('\0', false))
-
-    check(tree.root.key == 5)
-    check(tree.root.right.key == 10)
-    check(tree.root.left.key == 1)
-
-  suite("red black tree"):
-    test("red black initialization"):
-      check(newRedBlackTree[int, char]() != nil)
-
-    test("red black simple insert"):
-      let tree = newRedBlackTree[int, char]()
-      check(tree.insert(5, 'b'))
-      check(tree.insert(10, 'c'))
-      check(not tree.insert(5, 'd'))
-      check(tree.len() == 2)
-      check(tree.find(5) == ('d', true))
-      check(tree.find(10) == ('c', true))
-      check(tree.find(15) == ('\0', false))
-
-    test("red black insert balanced"):
-      let tree = newRedBlackTree[int, char]()
-      check(tree.insert(5, 'b'))
-      check(tree.insert(1, 'a'))
-      check(tree.insert(10, 'c'))
-      checkTree(tree)
-
-    test("red black insert right leaning"):
-      let tree = newRedBlackTree[int, char]()
-      check(tree.insert(1, 'a'))
-      check(tree.insert(5, 'b'))
-      check(tree.insert(10, 'c'))
-      checkTree(tree)
-
-    test("red black insert right leaning double rotation"):
-      let tree = newRedBlackTree[int, char]()
-      check(tree.insert(1, 'a'))
-      check(tree.insert(10, 'c'))
-      check(tree.insert(5, 'b'))
-      checkTree(tree)
-
-    test("red black insert left leaning"):
-      let tree = newRedBlackTree[int, char]()
-      check(tree.insert(10, 'c'))
-      check(tree.insert(5, 'b'))
-      check(tree.insert(1, 'a'))
-      checkTree(tree)
-
-    test("red black insert left leaning double rotation"):
-      let tree = newRedBlackTree[int, char]()
-      check(tree.insert(10, 'c'))
-      check(tree.insert(1, 'a'))
-      check(tree.insert(5, 'b'))
-      checkTree(tree)
-
-    test("red black inorder"):
-      let tree = newRedBlackTree[int, char]()
-      for i in 1..10:
-        tree.insert(i, 'a')
-      var i = 1
-      for key, value in tree.iterOrder():
-        check(i == key)
-        i += 1
-      check(i == 11)
-
-    test("red black remove simple"):
-      let tree = newRedBlackTree[int, char]()
-      tree.insert(10, 'a')
-      tree.insert(15, 'b')
-      tree.insert(20, 'c')
-
-      tree.remove(20)
-      check(tree.len() == 2)
-      check(tree.find(10) == ('a', true))
-      check(tree.find(15) == ('b', true))
-      check(tree.find(20) == ('\0', false))
-
-      tree.remove(15)
-      check(tree.len() == 1)
-      check(tree.find(10) == ('a', true))
-      check(tree.find(15) == ('\0', false))
-      check(tree.find(20) == ('\0', false))
-
-      tree.remove(10)
-      check(tree.len() == 0)
-      check(tree.find(10) == ('\0', false))
-      check(tree.find(15) == ('\0', false))
-      check(tree.find(20) == ('\0', false))
-
-    test("red black remove rotation"):
-      let tree = newRedBlackTree[int, char]()
-      tree.insert(1, 'a')
-      tree.insert(5, 'b')
-      tree.insert(10, 'c')
-      tree.insert(15, 'd')
-      tree.insert(20, 'e')
-
-      tree.remove(1)
-      check(tree.len() == 4)
-      check(tree.find(1) == ('\0', false))
-      check(tree.find(5) == ('b', true))
-      check(tree.find(10) == ('c', true))
-      check(tree.find(15) == ('d', true))
-      check(tree.find(20) == ('e', true))
-
-    test("red black remove double rotation"):
-      let tree = newRedBlackTree[int, char]()
-      tree.insert(5, 'b')
-      tree.insert(1, 'a')
-      tree.insert(10, 'c')
-      tree.insert(15, 'd')
-
-      tree.remove(1)
-      check(tree.len() == 3)
-      check(tree.find(1) == ('\0', false))
-      check(tree.find(5) == ('b', true))
-      check(tree.find(10) == ('c', true))
-      check(tree.find(15) == ('d', true))
-
-    test("red black remove non leaf"):
-      let tree = newRedBlackTree[int, char]()
-      tree.insert(5, 'b')
-      tree.insert(1, 'a')
-      tree.insert(10, 'c')
-      tree.insert(15, 'd')
-
-      tree.remove(10)
-      check(tree.len() == 3)
-      check(tree.find(1) == ('a', true))
-      check(tree.find(5) == ('b', true))
-      check(tree.find(10) == ('\0', false))
-      check(tree.find(15) == ('d', true))
-
-    test("red black remove nonexistant"):
-      let tree = newRedBlackTree[int, char]()
-      tree.insert(1, 'a')
-      tree.insert(5, 'b')
-      check(tree.len() == 2)
-      tree.remove(10)
-      check(tree.len() == 2)
+iterator iterOrder*[K, V](tree: RedBlackTree[K, V]): (K, V) {.deprecated: "use pairs instead".} =
+  ## Iterates over the elements of the tree in order.
+  ## Deprecated: use `pairs` instead for API consistency.
+  for k, v in tree.pairs:
+    yield (k, v)

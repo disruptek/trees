@@ -278,7 +278,7 @@ proc fixRemove[K, V](tree: var AVLTree[K, V], node: Node[K, V]) =
       case parent.balance
       of -1:
         # Old balance factor was -1, and we decreased the height of the left
-        # subtree, now now it's -2, rebalance needed
+        # subtree, now it's -2, rebalance needed
         let sib = parent.right
         let sibBalance = if sib.isNil: 0 else: sib.balance
         if sibBalance == 1:

@@ -112,7 +112,7 @@ proc splay[K, V](tree: var SplayTree[K, V], node: Node[K, V]) =
       tree.rotateLeft(node.parent)
 
 proc findNode[K, V](tree: SplayTree[K, V], key: K): (Node[K, V], Node[K, V]) =
-  ## Finds a node with the given key and it's parent, or nil if it doesn't exist.
+  ## Finds a node with the given key and its parent, or nil if it doesn't exist.
   var parent: Node[K, V]
   var curr = tree.root
   block found:
@@ -193,8 +193,8 @@ proc insert*[K, V](tree: var SplayTree[K, V], key: K, value: V): bool {.discarda
 proc successor[K, V](tree: SplayTree[K, V]; node: Node[K, V]): Node[K, V] =
   ## Returns the successor of the given node, or nil if one doesn't exist
   result = node.right
-  while not result.isNil and not result.right.isNil:
-    result = result.right
+  while not result.isNil and not result.left.isNil:
+    result = result.left
 
 proc remove*[K, V](tree: var SplayTree[K, V], key: K): bool {.discardable.} =
   ## Remove a key value pair from the tree. Returns true if something was

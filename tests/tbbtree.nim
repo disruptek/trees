@@ -4,13 +4,12 @@ import std/times
 
 import pkg/balls
 
-import trees/bbtree
+import pkg/trees/bbtree
 
 func isOrdered[K,V](root: BBTree[K,V], min: K): bool =
   var last = min
-  for k, v in inorder(root):
+  for k, v in pairs(root):
     if last == min or cmp(last, k) < 0:
-      #ok
       last = k
     else:
       return false
@@ -30,30 +29,30 @@ suite "int,int":
     check(len(root) == 0)
 
   test "one entry tree is ordered, balanced, has length one":
-    root = add(root, 1, -1)
+    root = insert(root, 1, -1)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 1)
 
   test "one entry tree lookup works":
-    var res = get(root, 1, -42)
+    var res = find(root, 1, -42)
     check(res == -1)
-    res = get(root, 3, -42)
+    res = find(root, 3, -42)
     check(res == -42)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 1)
 
-  test "add items in increasing key order, check ordered, balanced, has length 21":
+  test "insert items in increasing key order, check ordered, balanced, has length 21":
     for i in 2..<22:
-      root = add(root, i, -i)
+      root = insert(root, i, -i)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 21)
 
-  test "add items in decreasing key order, check ordered, balanced, has length 44":
+  test "insert items in decreasing key order, check ordered, balanced, has length 44":
     for i in (-44)..(-22):
-      root = add(root, -i, i)
+      root = insert(root, -i, i)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 44)
@@ -63,7 +62,7 @@ suite "int,int":
     check(mk == 1 and mv == -1)
     let (xk,xv) = getMax(root,(-99,99))
     check(xk == 44 and xv == -44)
-    let av = get(root, 25, 500)
+    let av = find(root, 25, 500)
     check(av == -25)
     let (nk,nv) = getNth(root,6,(-99,99)) # nth is 0-based
     check(nk == 7 and nv == -7)
@@ -107,72 +106,72 @@ suite "int,int":
       let (k,v) = getNext(root,i,(-99,99))
       check(k == i+1 and v == -(i+1))
 
-  test "delete some items, check, check ordered, balanced, and length":
-    root = del(root, 13)
+  test "remove some items, check, check ordered, balanced, and length":
+    root = remove(root, 13)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 43)
-    var res = get(root, 13, -999)
+    var res = find(root, 13, -999)
     check(res == -999)
-    res = get(root, 26, -999)
+    res = find(root, 26, -999)
     check(res == -26)
-    root = del(root, 26)
+    root = remove(root, 26)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 42)
-    res = get(root, 26, -999)
+    res = find(root, 26, -999)
     check(res == -999)
-    res = get(root, 1, -999)
+    res = find(root, 1, -999)
     check(res == -1)
     root = delMin(root)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 41)
-    res = get(root, 1, -999)
+    res = find(root, 1, -999)
     check(res == -999)
-    res = get(root, 44, -999)
+    res = find(root, 44, -999)
     check(res == -44)
     root = delMax(root)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 40)
-    res = get(root, 44, -999)
+    res = find(root, 44, -999)
     check(res == -999)
     check(delMin(null).isNil)
     check(delMax(null).isNil)
-    check(del(null, 19).isNil)
+    check(remove(null, 19).isNil)
 
-  test "delete random items, check, check ordered, balanced, and length":
+  test "remove random items, check, check ordered, balanced, and length":
     var n = len(root)
     while n > 0:
       let i = rand(rand0, n-1)
       let (k0,v0) = getNth(root,i,(-99,99))
       discard v0
       check(k0 != -99)
-      root = del(root, k0)
-      let v1 = get(root,k0,99)
+      root = remove(root, k0)
+      let v1 = find(root,k0,99)
       check(v1 == 99)
       n = n-1
       check(len(root) == n)
       check(isOrdered(root, low(int)))
       check(isBalanced(root))
 
-  test "using add to replace values":
+  test "using insert to replace values":
     for i in 1..9:
-      root = add(root, i, -i)
+      root = insert(root, i, -i)
     check(isOrdered(root, low(int)))
     check(isBalanced(root))
     check(len(root) == 9)
-    check(get(root,3,99) == -3)
-    root = add(root, 3, -33)
+    check(find(root,3,99) == -3)
+    root = insert(root, 3, -33)
     check(len(root) == 9)
-    check(get(root,3,99) == -33)
+    check(find(root,3,99) == -33)
 
 suite "test opacity":
 
   var root : BBTree[int,string] = nil
 
-  root = add(root, 1, "one")
+  root = insert(root, 1, "one")
 
   test "opacity":
     # manually checked, generate compile errors as expected...
@@ -187,20 +186,18 @@ suite "test opacity":
 suite "test map and fold":
 
   var root : BBTree[int,int] = nil
-  #let null = root
 
   for i in 1..<20:
-    root = add(root, i, -i)
+    root = insert(root, i, -i)
 
   test "fold to string":
     proc p(k: int, v: int, b: string): string =
       discard k
       $v & ";" & b
     var d = fold(root, p, "")
-    # echo d
     let s = split(d, {';'})
     var i = 0
-    for _, v in inorder(root):
+    for _, v in pairs(root):
       check($v == s[i])
       i += 1
 
@@ -260,17 +257,17 @@ suite "test set funcs":
     var bb : BBTree[pair,bool]
     var x = (a:1,b:2)
     var y = (a:3,b:4)
-    aa = aa.add(x, true)
-    aa = aa.add(y, true)
-    bb = bb.add(x, true)
-    bb = bb.add(y, true)
+    aa = insert(aa, x, true)
+    aa = insert(aa, y, true)
+    bb = insert(bb, x, true)
+    bb = insert(bb, y, true)
     check(aa =?= bb)
 
   test "ints as set keys":
     var aa : BBTree[int,bool]
-    for i in 1..99: aa = aa.add(i, true)
+    for i in 1..99: aa = insert(aa, i, true)
     var bb : BBTree[int,bool]
-    for i in 33..131: bb = bb.add(i, true)
+    for i in 33..131: bb = insert(bb, i, true)
     var cc = aa * bb
     check(len(cc) == 67)
     check(len(cc - aa) == 0)
@@ -330,17 +327,17 @@ suite "random stress test":
 
     proc tstput(k: int64) =
       let (key,val) = make_random_key_val(k)
-      tree = tree.add(key, val)
+      tree = insert(tree, key, val)
 
     proc tstget(k: int64) : int64 =
       let (key,val) = make_random_key_val(k)
       discard val
-      result = tree.get(key, 1)
+      result = find(tree, key, 1)
 
     proc tstrem(k: int64) =
       let (key,val) = make_random_key_val(k)
       discard val
-      tree = tree.del(key)
+      tree = remove(tree, key)
 
     proc do_random_tree_op()  =
       let x = rand(rand1, STRESS_TEST_N-1)

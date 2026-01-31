@@ -4,22 +4,17 @@ import std/sequtils
 
 import pkg/balls
 
-import pkg/trees/avl
+import pkg/trees/wavl
 
 proc main =
-  proc checkTree(tree: AVLTree[int, char]) =
+  proc checkTree(tree: WAVLTree[int, char]) =
     check(tree.len() == 3)
     check(tree.find(10) == ('c', true))
     check(tree.find(5) == ('b', true))
     check(tree.find(1) == ('a', true))
     check(tree.find(2) == ('\0', false))
 
-    when compiles(tree.root):
-      check(tree.root.key == 5)
-      check(tree.root.right.key == 10)
-      check(tree.root.left.key == 1)
-
-  proc checkOrder(tree: AVLTree[int, int]; x: seq[int]) =
+  proc checkOrder(tree: WAVLTree[int, int]; x: seq[int]) =
     let a = toSeq tree.keys
     var b = x
     sort b
@@ -35,9 +30,9 @@ proc main =
       checkpoint " rank: ", r
       fail"tree is out-of-order"
 
-  suite "avl tree":
+  suite "wavl tree":
     test "simple insert":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check(tree.insert(5, 'b'))
       check(tree.insert(10, 'c'))
       check(not tree.insert(5, 'd'))
@@ -47,42 +42,42 @@ proc main =
       check(tree.find(15) == ('\0', false))
 
     test "insert balanced":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check(tree.insert(5, 'b'))
       check(tree.insert(1, 'a'))
       check(tree.insert(10, 'c'))
       checkTree(tree)
 
     test "insert right leaning":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check(tree.insert(1, 'a'))
       check(tree.insert(5, 'b'))
       check(tree.insert(10, 'c'))
       checkTree(tree)
 
     test "insert right leaning double rotation":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check(tree.insert(1, 'a'))
       check(tree.insert(10, 'c'))
       check(tree.insert(5, 'b'))
       checkTree(tree)
 
     test "insert left leaning":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check(tree.insert(10, 'c'))
       check(tree.insert(5, 'b'))
       check(tree.insert(1, 'a'))
       checkTree(tree)
 
     test "insert left leaning double rotation":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check(tree.insert(10, 'c'))
       check(tree.insert(1, 'a'))
       check(tree.insert(5, 'b'))
       checkTree(tree)
 
     test "in-order traversal":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       for i in 1..10:
         tree.insert(i, chr(ord('a') + i))
       var i = 1
@@ -102,7 +97,7 @@ proc main =
       check(i == 11)
 
     test "remove simple":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       tree.insert(10, 'a')
       tree.insert(15, 'b')
       tree.insert(20, 'c')
@@ -126,7 +121,7 @@ proc main =
       check(tree.find(20) == ('\0', false))
 
     test "remove rotation":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       tree.insert(1, 'a')
       tree.insert(5, 'b')
       tree.insert(10, 'c')
@@ -142,7 +137,7 @@ proc main =
       check(tree.find(20) == ('e', true))
 
     test "remove double rotation":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       tree.insert(5, 'b')
       tree.insert(1, 'a')
       tree.insert(10, 'c')
@@ -156,7 +151,7 @@ proc main =
       check(tree.find(15) == ('d', true))
 
     test "remove non-leaf":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       tree.insert(5, 'b')
       tree.insert(1, 'a')
       tree.insert(10, 'c')
@@ -170,7 +165,7 @@ proc main =
       check(tree.find(15) == ('d', true))
 
     test "remove non-existent":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       tree.insert(1, 'a')
       tree.insert(5, 'b')
       check(tree.len() == 2)
@@ -178,7 +173,7 @@ proc main =
       check(tree.len() == 2)
 
     test "natural api":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check(tree.insert(1, 'a'))
       check(tree.insert(5, 'b'))
       check(tree.insert(10, 'c'))
@@ -192,7 +187,7 @@ proc main =
       check tree[5] == 'd'
 
     test "find with var":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       tree.insert(1, 'a')
       tree.insert(5, 'b')
       var value: char
@@ -201,7 +196,7 @@ proc main =
       check not tree.find(10, value)
 
     test "select, rank (0-based)":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check tree.insert(5, 'b')
       check tree.select(0)[0] == 5
       check tree.insert(10, 'c')
@@ -217,13 +212,13 @@ proc main =
       check tree.select(-1)[0] == 10
       check tree.select(-2)[0] == 5
       check tree.select(-3)[0] == 1
-      # Rank is now 0-based
+      # Rank is 0-based
       check 0 == tree.rank(tree.select(0)[0])
       check 1 == tree.rank(tree.select(1)[0])
       check 2 == tree.rank(tree.select(2)[0])
 
     test "popMin, popMax":
-      var tree: AVLTree[int, char]
+      var tree: WAVLTree[int, char]
       check tree.insert(5, 'b')
       check tree.insert(6, 'f')
       check tree.insert(10, 'c')
@@ -235,8 +230,24 @@ proc main =
       check tree.popMax() == (10, 'c')
       check tree.popMax() == (8, 'd')
 
+    test "contains":
+      var tree: WAVLTree[int, char]
+      tree.insert(1, 'a')
+      tree.insert(5, 'b')
+      check tree.contains(1)
+      check tree.contains(5)
+      check not tree.contains(10)
+
+    test "min, max":
+      var tree: WAVLTree[int, char]
+      tree.insert(5, 'b')
+      tree.insert(1, 'a')
+      tree.insert(10, 'c')
+      check tree.min() == (1, 'a')
+      check tree.max() == (10, 'c')
+
     test "stress in-order":
-      var tree: AVLTree[int, int]
+      var tree: WAVLTree[int, int]
       var rng = initRand(0x12345678)
       const N = 1_000
       var x = newSeqOfCap[int](N)
@@ -260,7 +271,7 @@ proc main =
         checkOrder(tree, y)
 
     test "stress out-of-order":
-      var tree: AVLTree[int, int]
+      var tree: WAVLTree[int, int]
       var rng = initRand(0x87654321)
       const N = 1_000
       var x = newSeqOfCap[int](N)

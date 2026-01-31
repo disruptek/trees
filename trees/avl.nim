@@ -1,19 +1,5 @@
-## Implementation of an AVL tree in Nim, based on
-## https://en.wikipedia.org/wiki/AVL_tree.
-## Recursive iterators aren't allowed in nim, so iterative tree traversals were
-## needed, found on wikipedia as well.
-##
-## Elements are compared via the `cmp` function, so the `<` and `==` operators
-## should be defined for the key type of the tree. Duplicate keys are not
-## allowed in the tree.
-##
-## AVL trees are balanced binary search trees with the following worst case time
-## complexities for common operations:
-## space: O(n)
-## insert: O(lg(n))
-## remove: O(lg(n))
-## find: O(lg(n))
-## in-order iteration: O(n)
+## AVL tree implementation.
+## https://en.wikipedia.org/wiki/AVL_tree
 
 type
   Node[K, V] = ref object
@@ -29,7 +15,9 @@ type
     root: Node[K, V]
     size: int
 
-  AVLKeyVal[K, V] = tuple[key: K; val: V]
+proc newAVLTree*[K, V](): AVLTree[K, V] =
+  ## Construct a new AVL tree.
+  discard
 
 proc min(node: Node): Node =
   result = node
@@ -41,14 +29,18 @@ proc max(node: Node): Node =
   while not result.right.isNil:
     result = result.right
 
-proc max*[K, V](tree: AVLTree[K, V]): AVLKeyVal[K, V] =
+proc max*[K, V](tree: AVLTree[K, V]): (K, V) =
+  ## Returns the largest key/value pair in the tree.
+  ## Raises ValueError if the tree is empty.
   if tree.size == 0:
     raise ValueError.newException "tree is empty"
   else:
     let node = max(tree.root)
     result = (node.key, node.value)
 
-proc min*[K, V](tree: AVLTree[K, V]): AVLKeyVal[K, V] =
+proc min*[K, V](tree: AVLTree[K, V]): (K, V) =
+  ## Returns the smallest key/value pair in the tree.
+  ## Raises ValueError if the tree is empty.
   if tree.size == 0:
     raise ValueError.newException "tree is empty"
   else:
@@ -77,38 +69,46 @@ proc pred[K, V](tree: AVLTree[K, V], node: Node[K, V]): Node[K, V] {.used.} =
       result = result.parent
 
 proc rotateLeft[K, V](tree: var AVLTree[K, V], parent: Node[K, V]) =
-  ## Rotates a tree left around the given node
+  ## Rotates a tree left around the given node.
   if parent.isNil or parent.right.isNil:
     return
   var right = parent.right
+  # right takes parent's position
+  right.parent = parent.parent
+  # right's left subtree becomes parent's right subtree
   parent.right = right.left
   if not right.left.isNil:
     right.left.parent = parent
-  right.parent = parent.parent
+  # update grandparent's child pointer
   if parent.parent.isNil:
     tree.root = right
   elif parent.parent.left == parent:
     parent.parent.left = right
   else:
     parent.parent.right = right
+  # parent becomes right's left child
   right.left = parent
   parent.parent = right
 
 proc rotateRight[K, V](tree: var AVLTree[K, V], parent: Node[K, V]) =
-  ## Rotates a tree right around the given node
+  ## Rotates a tree right around the given node.
   if parent.isNil or parent.left.isNil:
     return
   var left = parent.left
+  # left takes parent's position
+  left.parent = parent.parent
+  # left's right subtree becomes parent's left subtree
   parent.left = left.right
   if not left.right.isNil:
     left.right.parent = parent
-  left.parent = parent.parent
+  # update grandparent's child pointer
   if parent.parent.isNil:
     tree.root = left
   elif parent.parent.right == parent:
     parent.parent.right = left
   else:
     parent.parent.left = left
+  # parent becomes left's right child
   left.right = parent
   parent.parent = left
 
@@ -337,8 +337,6 @@ proc remove*[K, V](tree: var AVLTree[K, V], key: K): bool {.discardable.} =
   if result:
     remove(tree, node)
 
-proc del*[K, V](tree: var AVLTree[K, V], key: K) =
-  discard remove(tree, key)
 
 proc pop*[K, V](tree: var AVLTree[K, V], key: K): V {.discardable.} =
   ## Remove `key` from `tree` and return its value.
@@ -393,74 +391,66 @@ iterator values*[K, V](tree: AVLTree[K, V]): V =
       stack.add(node)
       node = node.left
 
-proc select[K, V](node: Node[K, V]; i: Positive): Node[K, V] =
-  ## Returns the `i`'th smallest (one-indexed) child in `node`.
+proc selectNode[K, V](node: Node[K, V]; i: Natural): Node[K, V] =
+  ## Returns the `i`'th smallest (0-indexed) child in `node`.
   if node.isNil:
-    raise IndexDefect.newException "bogus tree"
+    raise IndexDefect.newException "index out of bounds"
   else:
-    let r = node.left.count + 1
-    if i == r:
+    let leftCount = node.left.count
+    if i == leftCount:
       node
-    elif i < r:
-      select(node.left, i)
+    elif i < leftCount:
+      selectNode(node.left, i)
     else:
-      select(node.right, i - r)
+      selectNode(node.right, i - leftCount - 1)
 
-proc select*[K, V](tree: AVLTree[K, V]; i: Positive): AVLKeyVal[K, V] =
-  ## Returns the `i`'th smallest (one-indexed) item in `tree`.
+proc select*[K, V](tree: AVLTree[K, V]; i: int): (K, V) =
+  ## Returns the `i`'th smallest (0-indexed) item in `tree`.
+  ## Negative indices count from the end (-1 = last).
+  ## Raises IndexDefect if index is out of bounds.
   if tree.root.isNil:
-    raise ValueError.newException "tree is empty"
-  elif tree.size < i:
-    raise IndexDefect.newException "bogus index"
-  else:
-    var node = select(tree.root, i)
-    result = (node.key, node.value)
+    raise IndexDefect.newException "index out of bounds"
+  var idx = i
+  if idx < 0:
+    idx = tree.size + idx
+  if idx < 0 or idx >= tree.size:
+    raise IndexDefect.newException "index out of bounds"
+  let node = selectNode(tree.root, idx)
+  result = (node.key, node.value)
 
-proc rank[K, V](root: Node[K, V]; node: Node[K, V]): Positive =
-  ## Returns the position of `node` (one-indexed) in `root`.
+proc rankNode[K, V](root: Node[K, V]; node: Node[K, V]): Natural =
+  ## Returns the 0-indexed position of `node` in `root`.
   var node = node
-  result = node.left.count + 1
+  result = node.left.count
   while node != root:
     if node == node.parent.right:
       result += node.parent.left.count + 1
     node = node.parent
 
-proc rank[K, V](tree: AVLTree[K, V]; node: Node[K, V]): Positive =
-  ## Returns the position of `node` (one-indexed) in `tree`.
+proc rank*[K, V](tree: AVLTree[K, V]; key: K): Natural =
+  ## Returns the 0-indexed position of `key` in `tree`.
+  ## Raises KeyError if key is not found.
   if tree.root.isNil:
-    raise ValueError.newException "tree is empty"
-  elif node.isNil:
-    raise ValueError.newException "node is nil"
-  else:
-    result = rank(tree.root, node)
+    raise KeyError.newException "not found"
+  var node = tree.findNode(key)
+  if node.isNil:
+    raise KeyError.newException "not found"
+  result = rankNode(tree.root, node)
 
-proc rank*[K, V](tree: AVLTree[K, V]; key: K): Positive =
-  ## Returns the position of `node` (one-indexed) in `tree`.
-  if tree.root.isNil:
-    raise ValueError.newException "tree is empty"
-  else:
-    var node = tree.findNode(key)
-    if node.isNil:
-      raise KeyError.newException "not found"
-    else:
-      result = rank(tree.root, node)
-
-proc popMin*[K, V](tree: var AVLTree[K, V]): AVLKeyVal[K, V] {.discardable.} =
+proc popMin*[K, V](tree: var AVLTree[K, V]): (K, V) {.discardable.} =
   ## Removes and returns the smallest key/value pair in `tree`.
+  ## Raises ValueError if the tree is empty.
   if tree.root.isNil or tree.size == 0:
     raise ValueError.newException "tree is empty"
-  else:
-    var node = min(tree.root)
-    result.key = move node.key
-    result.val = move node.value
-    remove(tree, node)
+  var node = min(tree.root)
+  result = (move node.key, move node.value)
+  remove(tree, node)
 
-proc popMax*[K, V](tree: var AVLTree[K, V]): AVLKeyVal[K, V] {.discardable.} =
+proc popMax*[K, V](tree: var AVLTree[K, V]): (K, V) {.discardable.} =
   ## Removes and returns the largest key/value pair in `tree`.
+  ## Raises ValueError if the tree is empty.
   if tree.root.isNil or tree.size == 0:
     raise ValueError.newException "tree is empty"
-  else:
-    var node = max(tree.root)
-    result.key = move node.key
-    result.val = move node.value
-    remove(tree, node)
+  var node = max(tree.root)
+  result = (move node.key, move node.value)
+  remove(tree, node)

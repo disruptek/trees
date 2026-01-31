@@ -1,46 +1,11 @@
-#[
-Copyright (c) 2012-18 Doug Currie, Londonderry, NH, USA
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-and associated documentation files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or
-substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-]#
-
-#[ Bounded Balance Trees a.k.a. Weight Balanced Trees
-
-References:
-
-Implementing Sets Efficiently in a Functional Language
-Stephen Adams
-CSTR 92-10
-Department of Electronics and Computer Science University of Southampton Southampton S09 5NH
-
-Adams’ Trees Revisited Correct and Efficient Implementation
-Milan Straka <fox@ucw.cz>
-Department of Applied Mathematics Charles University in Prague, Czech Republic
-]#
-
-## Bounded Balance Trees a.k.a. Weight Balanced Trees
+## Bounded Balance tree (weight-balanced tree) implementation.
+## https://en.wikipedia.org/wiki/Weight-balanced_tree
 ##
-## a persistent data structure providing a generic (parameterized) key,value map
+## References:
+## - Adams, "Implementing Sets Efficiently in a Functional Language", CSTR 92-10
+## - Straka, "Adams' Trees Revisited", 2011
 ##
-## * Insert (``add``), lookup (``get``), and delete (``del``) in O(log(N)) time
-## * Key-ordered iterators (``inorder`` and ``revorder``)
-## * Lookup by relative position from beginning or end (``getNth``) in O(log(N)) time
-## * Get the position (``rank``) by key in O(log(N)) time
-## * Efficient set operations using tree keys
-## * Map extensions to set operations with optional value merge control for duplicates
+## Copyright (c) 2012-18 Doug Currie. MIT License.
 
 type
     BBTree*[K,V] = ref object   # BBTree is a generic type with keys and values of types K, V
@@ -74,25 +39,7 @@ func newNode[K,V](left: BBTree[K,V], key: K, value: V, right: BBTree[K,V]): BBTr
     let size = nodeSize(left) + 1 + nodeSize(right)
     result = BBTree[K,V](left: left, right: right, size: size, key: key, val: value)
 
-#[ **************************** balance ********************************
-#
-singleL l k (Node rl _ rk rr) = node (node l k rl) rk rr
-singleR (Node ll _ lk lr) k r = node ll lk (node lr k r)
-doubleL l k (Node (Node rll _ rlk rlr) _ rk rr) =
-  node (node l k rll) rlk (node rlr rk rr)
-doubleR (Node ll _ lk (Node lrl _ lrk lrr)) k r =
-  node (node ll lk lrl) lrk (node lrr k r)
-
-balance left key right
-    | size left + size right <= 1 = node left key right
-    | size right > omega * size left + delta = case right of
-         (Node rl _ _ rr) | size rl<alpha*size rr -> singleL left key right
-                          | otherwise             -> doubleL left key right
-    | size left > omega * size right + delta = case left of
-         (Node ll _ _ lr) | size lr<alpha*size ll -> singleR left key right
-                          | otherwise             -> doubleR left key right
-    | otherwise = node left key right
-]#
+# Balance operations
 
 func singleL[K,V](left: BBTree[K,V], key: K, value: V, right: BBTree[K,V]): BBTree[K,V] =
     result = newNode(newNode(left, key, value, right.left),
@@ -141,17 +88,9 @@ func balance[K,V](left: BBTree[K,V], key: K, value: V, right: BBTree[K,V]): BBTr
     else:
         result = newNode(left, key, value, right)
 
-#[ **************************** insert ********************************
-#
-insert :: Ord a => a -> BBTree a -> BBTree a
-insert k Nil = node Nil k Nil
-insert k (Node left _ key right) = case k ‘compare‘ key of
-                                     LT -> balance (insert k left) key right
-                                     EQ -> node left k right
-                                     GT -> balance left key (insert k right)
-]#
+# Insert
 
-func add*[K,V](root: BBTree[K,V], key: K, value: V): BBTree[K,V] =
+func insert*[K,V](root: BBTree[K,V], key: K, value: V): BBTree[K,V] =
     ## Returns a new tree with the (`key`, `value`) pair added, or replaced if `key` is already
     ## in the tree `root`. O(log N)
     if root.isNil:
@@ -159,22 +98,20 @@ func add*[K,V](root: BBTree[K,V], key: K, value: V): BBTree[K,V] =
     else:
         let dif = cmp(key, root.key);
         if (dif < 0):
-            result = balance(add(root.left, key, value), root.key, root.val, root.right)
+            result = balance(insert(root.left, key, value), root.key, root.val, root.right)
         elif (dif > 0):
-            result = balance(root.left, root.key, root.val, add(root.right, key, value))
+            result = balance(root.left, root.key, root.val, insert(root.right, key, value))
         else: # key and root.key are equal
-            #if (value == root.val)
-            #    # no need to allocate a new node
-            #    result = node
-            #else:
-                result = newNode(root.left, key, value, root.right)
+            result = newNode(root.left, key, value, root.right)
 
-#[ ***************************** lookup *********************************
-]#
+func add*[K,V](root: var BBTree[K,V], key: K, value: V) =
+    ## Mutable wrapper: inserts (`key`, `value`) pair into `root`.
+    let immutable = root
+    root = insert(immutable, key, value)  # sigmatch the immutable version
 
-# default is returned is key is not in tree
-#
-func get*[K,V](root: BBTree[K,V], key: K, default: V): V =
+# Lookup
+
+func find*[K,V](root: BBTree[K,V], key: K, default: V): V =
     ## Retrieves the value for `key` in the tree `root` iff `key` is in the tree.
     ## Otherwise, `default` is returned. O(log N)
     result = default
@@ -296,37 +233,16 @@ func getPrev*[K,V](root: BBTree[K,V], key: K, default: (K,V)): (K,V) =
                 done = true
 
 
-#[ ***************************** delete *********************************
-#
-delete :: Ord a => a -> BBTree a -> BBTree a
-delete _ Nil = Nil
-delete k (Node left _ key right) = case k ‘compare‘ key of
-                                     LT -> balance (delete k left) key right
-                                     EQ -> glue left right
-                                     GT -> balance left key (delete k right)
-  where glue Nil right = right
-        glue left Nil = left
-        glue left right
-          | size left > size right = let (key’, left’) = extractMax left
-                                     in node left’ key’ right
-          | otherwise              = let (key’, right’) = extractMin right
-                                     in node left key’ right’
-        extractMin (Node Nil _ key right) = (key, right)
-        extractMin (Node left _ key right) = case extractMin left of
-          (min, left’) -> (min, balance left’ key right)
-        extractMax (Node left _ key Nil) = (key, left)
-        extractMax (Node left _ key right) = case extractMax right of
-          (max, right’) -> (max, balance left key right’)
-]#
+# Delete
 
-func extractMin[K,V](node: BBTree[K,V]): (K, V, BBTree[K,V]) = # (mink, minv, node')
+func extractMin[K,V](node: BBTree[K,V]): (K, V, BBTree[K,V]) =
     if node.left.isNil:
         result = (node.key, node.val, node.right)
     else:
         let (mink, minv, nodep) = extractMin(node.left)
         result = (mink, minv, balance(nodep, node.key, node.val, node.right))
 
-func extractMax[K,V](node: BBTree[K,V]): (K, V, BBTree[K,V]) = # (maxk, maxv, node')
+func extractMax[K,V](node: BBTree[K,V]): (K, V, BBTree[K,V]) =
     if node.right.isNil:
         result = (node.key, node.val, node.left)
     else:
@@ -345,19 +261,24 @@ func glue[K,V](left: BBTree[K,V], right: BBTree[K,V]): BBTree[K,V] =
         let (mink, minv, rightp) = extractMin(right)
         result = newNode(left, mink, minv, rightp)
 
-func del*[K,V](root: BBTree[K,V], key: K): BBTree[K,V] =
-    ## Deletes `key` from tree `root`. Does nothing if the key does not exist.
+func remove*[K,V](root: BBTree[K,V], key: K): BBTree[K,V] =
+    ## Removes `key` from tree `root`. Does nothing if the key does not exist.
     ## O(log N)
     if root.isNil:
         result = root
     else:
         let dif = cmp(key, root.key);
         if (dif < 0):
-            result = balance(del(root.left, key), root.key, root.val, root.right)
+            result = balance(remove(root.left, key), root.key, root.val, root.right)
         elif (dif > 0):
-            result = balance(root.left, root.key, root.val, del(root.right, key))
+            result = balance(root.left, root.key, root.val, remove(root.right, key))
         else: # key and root.key are eq
             result = glue(root.left, root.right)
+
+func del*[K,V](root: var BBTree[K,V], key: K) =
+    ## Mutable wrapper: removes `key` from `root`.
+    let immutable = root
+    root = remove(immutable, key)
 
 func delMin*[K,V](root: BBTree[K,V]): BBTree[K,V] =
     ## Delete the minimum element from tree `root`. O(log N)
@@ -379,8 +300,7 @@ func delMax*[K,V](root: BBTree[K,V]): BBTree[K,V] =
         discard maxv
         result = node
 
-#[ ****************************** rank ***********************************
-]#
+# Rank
 
 func rank*[K,V](root: BBTree[K,V], key: K, default: int): int =
     ## Retrieves the 0-based index of `key` in the tree `root` iff `key` is in the tree.
@@ -399,77 +319,76 @@ func rank*[K,V](root: BBTree[K,V], key: K, default: int): int =
             result = n + nodeSize(node.left)
             node = nil # break
 
-#[ **************************** iterators ********************************
-]#
+# Iterators
 
-#[ useless!?...
-iterator preorder*[K,V](root: BBTree[K,V]): (K,V) =
-  # Preorder traversal of a binary tree.
-  # Since recursive iterators are not yet implemented,
-  # this uses an explicit stack (which is more efficient anyway):
-  var stack: seq[BBTree[K,V]] = @[root]
-  while stack.len > 0:
-    var curr = stack.pop()
-    while curr != nil:
-      yield (curr.key, curr.val)
-      add(stack, curr.right)  # push right subtree onto the stack
-      curr = curr.left        # and follow the left pointer
-]#
+iterator pairs*[K,V](root: BBTree[K,V]): (K,V) =
+    ## Iterates over (key, value) pairs in order (smallest to largest).
+    var stack: seq[BBTree[K,V]] = @[]
+    var curr = root
+    while (not curr.isNil) or stack.len > 0:
+        while (not curr.isNil):
+            add(stack, curr)
+            curr = curr.left
+        curr = stack.pop()
+        yield (curr.key, curr.val)
+        curr = curr.right
+
+iterator keys*[K,V](root: BBTree[K,V]): K =
+    ## Iterates over keys in order (smallest to largest).
+    var stack: seq[BBTree[K,V]] = @[]
+    var curr = root
+    while (not curr.isNil) or stack.len > 0:
+        while (not curr.isNil):
+            add(stack, curr)
+            curr = curr.left
+        curr = stack.pop()
+        yield curr.key
+        curr = curr.right
+
+iterator values*[K,V](root: BBTree[K,V]): V =
+    ## Iterates over values in order (smallest to largest key).
+    var stack: seq[BBTree[K,V]] = @[]
+    var curr = root
+    while (not curr.isNil) or stack.len > 0:
+        while (not curr.isNil):
+            add(stack, curr)
+            curr = curr.left
+        curr = stack.pop()
+        yield curr.val
+        curr = curr.right
 
 iterator inorder*[K,V](root: BBTree[K,V]): (K,V) =
-    ## Inorder traversal of the tree at `root`, i.e., from smallest to largest key
-    # Since recursive iterators are not yet implemented, this uses an explicit stack
-    var stack: seq[BBTree[K,V]] = @[]
-    var curr = root
-    while (not curr.isNil) or stack.len > 0:
-        while (not curr.isNil):
-            add(stack, curr) # push node before going left
-            curr = curr.left
-        # at the leftmost node; curr is nil
-        curr = stack.pop()
-        yield (curr.key, curr.val)
-        curr = curr.right # now go right
+    ## Alias for `pairs`. Inorder traversal of the tree.
+    for kv in pairs(root):
+        yield kv
 
 iterator revorder*[K,V](root: BBTree[K,V]): (K,V) =
-    ## Reverse inorder traversal of the tree at `root`, i.e., from largest to smallest key
-    # Since recursive iterators are not yet implemented, this uses an explicit stack
+    ## Reverse inorder traversal of the tree (largest to smallest key).
     var stack: seq[BBTree[K,V]] = @[]
     var curr = root
     while (not curr.isNil) or stack.len > 0:
         while (not curr.isNil):
-            add(stack, curr) # push node before going right
+            add(stack, curr)
             curr = curr.right
-        # at the rightmost node; curr is nil
         curr = stack.pop()
         yield (curr.key, curr.val)
-        curr = curr.left # now go left
+        curr = curr.left
 
-#[ **************************** fold & map ********************************
-]#
+# Fold & Map
 
-# This could be a proc to allow f to modify base of type T, but trying that led to typing
-# trouble that I'd prefer to avoid for now.
-#
 proc fold*[K,V,T](root: BBTree[K,V], f: proc (key: K, val: V, base: T): T, base: T): T =
     ## Applies the proc `f` to each value of tree `root` in reverse order (right to left).
-    ## Uses the `base` value for the first rightmost operand. So, for example, to construct a
-    ## concatenated string of stringified tree values, you could use
-    ##
-    ## .. code-block::
-    ##
-    ##     fold(root, proc (k: int, v: int, b: string): string = discard k; $v & ";" &  b, "")
-    # Use explicit stack sice we have the logic from `revorder` above
+    ## Uses the `base` value for the first rightmost operand.
     var stack: seq[BBTree[K,V]] = @[]
     var curr = root
     result = base
     while (not curr.isNil) or stack.len > 0:
         while (not curr.isNil):
-            add(stack, curr) # push node before going right
+            add(stack, curr)
             curr = curr.right
-        # at the rightmost node; curr is nil
         curr = stack.pop()
         result = f(curr.key, curr.val, result)
-        curr = curr.left # now go left
+        curr = curr.left
 
 func map*[K,V,T](root: BBTree[K,V], f: proc (key: K, val: V): T {.noSideEffect.}): BBTree[K,T] =
     ## Returns a new tree with the keys of tree `root` and values that are the result of
@@ -484,16 +403,15 @@ func map*[K,V,T](root: BBTree[K,V], f: proc (key: K, val: V): T {.noSideEffect.}
     else:
         result = newNode(map(root.left, f), root.key, f(root.key, root.val), map(root.right, f))
 
-#[ **************************** set operations ********************************
-]#
+# Set operations
 
 # This is Adams's concat3
 #
 func join[K,V](key: K, val: V, left, right: BBTree[K,V]): BBTree[K,V] =
     if left.isNil:
-        result = add(right, key, val)
+        result = insert(right, key, val)
     elif right.isNil:
-        result = add(left, key, val)
+        result = insert(left, key, val)
     else:
         let sl = nodeSize(left)
         let sr = nodeSize(right)
@@ -752,8 +670,7 @@ func `=?=`*[K,U,V](s1: BBTree[K,U], s2: BBTree[K,V]): bool {.inline.} =
     ## Returns true if both `s1` and `s2` have the same keys and set size.
     result = setEqual(s1, s2)
 
-#[ **************************** convenience funcs ********************************
-]#
+# Convenience functions
 
 func toSet*[K](keys: openArray[K]): BBTree[K,bool] =
   ## Creates a BBTree set that contains the given `keys` with value `true`.
@@ -765,10 +682,9 @@ func toSet*[K](keys: openArray[K]): BBTree[K,bool] =
   ##   assert numbers.contains(2)
   ##   assert numbers.contains(4)
   result = nil
-  for key in items(keys): result = add(result, key, true)
+  for key in items(keys): result = insert(result, key, true)
 
-#[ **************************** for unit tests ********************************
-]#
+# Unit test helpers
 
 func countKeys*[K,V](root: BBTree[K,V]): int =
     ## Used for unit testing only; normally use `len` to get the number of keys.
@@ -787,25 +703,19 @@ func balanced[K,V](node: BBTree[K,V]): int = # returns size in nodes or -1 for e
         sr = nodeSize(node.right)
         sz = nodeSize(node)
     if sz != (sl + 1 + sr):
-        # fprintf(stderr, "Error in bbwatree balanced: %u != %u + 1 + %u; (%u %u)\n", sz, sl, sr, nx->left, nx->right);
         return -1
     if (sl + sr) <= 1:
-        # balanced
         discard
     elif sr > (omega * sl):
-        # fprintf(stderr, "Error in bbwatree balanced: sr %u > omega * %u\n", sr, sl);
         return -1
     elif sl > (omega * sr):
-        # fprintf(stderr, "Error in bbwatree balanced: sl %u > omega * %u\n", sl, sr);
         return -1
     let
         slb = balanced(node.left)
         srb = balanced(node.right)
     if (slb < 0) or (sl != slb):
-        # if (slb >= 0) fprintf(stderr, "Error in bbwatree balanced: sl %u != %lld\n", sl, slb);
         return -1
     if (srb < 0) or (sr != srb):
-        # if (srb >= 0) fprintf(stderr, "Error in bbwatree balanced: sr %u != %lld\n", sr, srb);
         return -1
     return sz
 
@@ -817,26 +727,16 @@ func isBalanced*[K,V](root: BBTree[K,V]): bool =
         return (size == 0)
     return (size > 0) and (size == nodeSize(root))
 
-#[ ***************************** sanity check ********************************
-]#
+# Sanity check
 
 when isMainModule:
 
     proc test1() =
         var
             tre0 : BBTree[string,int] = nil
-            tre1 = add(tre0, "hello", 1) # instantiate a BBTree with ("hello",1)
-            tre2 = add(tre1, "world", 1) # add ("world",2)
-        for str,num in inorder(tre2):
+            tre1 = insert(tre0, "hello", 1)
+            tre2 = insert(tre1, "world", 1)
+        for str,num in pairs(tre2):
             stdout.writeLine(str)
     test1()
     echo "done"
-
-
-#[ ******************************** notes ***********************************
-
-## For a bbwa tree, the max depth is log2(n) / log2(1 + 1/ω)
-## With omega at 3, log2(1 + 1/ω) = log2(1 + 1/3) = 0.41503749927884
-## The upper bound on depth is 2.41 * log2(n)
-
-]#

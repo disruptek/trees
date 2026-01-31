@@ -1,0 +1,44 @@
+nimTitle	bbtree	trees/bbtree.html	module trees/bbtree		0
+nim	BBTree	trees/bbtree.html#BBTree	type BBTree		11
+nim	len	trees/bbtree.html#len,BBTree[K,V]	proc len[K, V](root: BBTree[K, V]): int		29
+nim	insert	trees/bbtree.html#insert,BBTree[K,V],K,V	proc insert[K, V](root: BBTree[K, V]; key: K; value: V): BBTree[K, V]		93
+nim	add	trees/bbtree.html#add,BBTree[K,V],K,V	proc add[K, V](root: var BBTree[K, V]; key: K; value: V)		107
+nim	find	trees/bbtree.html#find,BBTree[K,V],K,V	proc find[K, V](root: BBTree[K, V]; key: K; default: V): V		114
+nim	getNth	trees/bbtree.html#getNth,BBTree[K,V],int,	proc getNth[K, V](root: BBTree[K, V]; index: int; default: (K, V)): (K, V)		129
+nim	getMin	trees/bbtree.html#getMin,BBTree[K,V],	proc getMin[K, V](root: BBTree[K, V]; default: (K, V)): (K, V)		155
+nim	getMax	trees/bbtree.html#getMax,BBTree[K,V],	proc getMax[K, V](root: BBTree[K, V]; default: (K, V)): (K, V)		166
+nim	getNext	trees/bbtree.html#getNext,BBTree[K,V],K,	proc getNext[K, V](root: BBTree[K, V]; key: K; default: (K, V)): (K, V)		183
+nim	getPrev	trees/bbtree.html#getPrev,BBTree[K,V],K,	proc getPrev[K, V](root: BBTree[K, V]; key: K; default: (K, V)): (K, V)		209
+nim	remove	trees/bbtree.html#remove,BBTree[K,V],K	proc remove[K, V](root: BBTree[K, V]; key: K): BBTree[K, V]		264
+nim	del	trees/bbtree.html#del,BBTree[K,V],K	proc del[K, V](root: var BBTree[K, V]; key: K)		278
+nim	delMin	trees/bbtree.html#delMin,BBTree[K,V]	proc delMin[K, V](root: BBTree[K, V]): BBTree[K, V]		283
+nim	delMax	trees/bbtree.html#delMax,BBTree[K,V]	proc delMax[K, V](root: BBTree[K, V]): BBTree[K, V]		293
+nim	rank	trees/bbtree.html#rank,BBTree[K,V],K,int	proc rank[K, V](root: BBTree[K, V]; key: K; default: int): int		305
+nim	pairs	trees/bbtree.html#pairs.i,BBTree[K,V]	iterator pairs[K, V](root: BBTree[K, V]): (K, V)		324
+nim	keys	trees/bbtree.html#keys.i,BBTree[K,V]	iterator keys[K, V](root: BBTree[K, V]): K		336
+nim	values	trees/bbtree.html#values.i,BBTree[K,V]	iterator values[K, V](root: BBTree[K, V]): V		348
+nim	inorder	trees/bbtree.html#inorder.i,BBTree[K,V]	iterator inorder[K, V](root: BBTree[K, V]): (K, V)		360
+nim	revorder	trees/bbtree.html#revorder.i,BBTree[K,V]	iterator revorder[K, V](root: BBTree[K, V]): (K, V)		365
+nim	fold	trees/bbtree.html#fold,BBTree[K,V],proc(K,V,T),T	proc fold[K, V, T](root: BBTree[K, V]; f: proc (key: K; val: V; base: T): T; base: T): T		379
+nim	map	trees/bbtree.html#map,BBTree[K,V],proc(K,V)	proc map[K, V, T](root: BBTree[K, V]; f: proc (key: K; val: V): T {.noSideEffect.}): BBTree[\n    K, T]		393
+nim	union	trees/bbtree.html#union,BBTree[K,V],BBTree[K,V]	proc union[K, V](tree1, tree2: BBTree[K, V]): BBTree[K, V]		467
+nim	unionMerge	trees/bbtree.html#unionMerge,BBTree[K,V],BBTree[K,V],proc(K,V,V)	proc unionMerge[K, V](tree1, tree2: BBTree[K, V];\n                 merge: proc (k: K; v1, v2: V): V {.noSideEffect.}): BBTree[K, V]		484
+nim	difference	trees/bbtree.html#difference,BBTree[K,V],BBTree[K,V]	proc difference[K, V](tree1, tree2: BBTree[K, V]): BBTree[K, V]		501
+nim	symmetricDifference	trees/bbtree.html#symmetricDifference,BBTree[K,V],BBTree[K,V]	proc symmetricDifference[K, V](tree1, tree2: BBTree[K, V]): BBTree[K, V]		511
+nim	contains	trees/bbtree.html#contains,BBTree[K,V],K	proc contains[K, V](root: BBTree[K, V]; key: K): bool		526
+nim	intersection	trees/bbtree.html#intersection,BBTree[K,V],BBTree[K,V]	proc intersection[K, V](tree1, tree2: BBTree[K, V]): BBTree[K, V]		541
+nim	intersectionMerge	trees/bbtree.html#intersectionMerge,BBTree[K,V],BBTree[K,V],proc(K,V,V)	proc intersectionMerge[K, V](tree1, tree2: BBTree[K, V];\n                        merge: proc (k: K; v1, v2: V): V {.noSideEffect.}): BBTree[\n    K, V]		559
+nim	isSubset	trees/bbtree.html#isSubset,BBTree[K,U],BBTree[K,V]	proc isSubset[K, U, V](tree1: BBTree[K, U]; tree2: BBTree[K, V]): bool		577
+nim	disjoint	trees/bbtree.html#disjoint,BBTree[K,V],BBTree[K,V]	proc disjoint[K, V](tree1, tree2: BBTree[K, V]): bool		599
+nim	isProperSubset	trees/bbtree.html#isProperSubset,BBTree[K,U],BBTree[K,V]	proc isProperSubset[K, U, V](tree1: BBTree[K, U]; tree2: BBTree[K, V]): bool		616
+nim	setEqual	trees/bbtree.html#setEqual,BBTree[K,U],BBTree[K,V]	proc setEqual[K, U, V](tree1: BBTree[K, U]; tree2: BBTree[K, V]): bool		622
+nim	`+`	trees/bbtree.html#+,BBTree[K,V],BBTree[K,V]	proc `+`[K, V](s1, s2: BBTree[K, V]): BBTree[K, V]		626
+nim	`*`	trees/bbtree.html#*,BBTree[K,V],BBTree[K,V]	proc `*`[K, V](s1, s2: BBTree[K, V]): BBTree[K, V]		630
+nim	`-`	trees/bbtree.html#-,BBTree[K,V],BBTree[K,V]	proc `-`[K, V](s1, s2: BBTree[K, V]): BBTree[K, V]		634
+nim	`-+-`	trees/bbtree.html#-+-,BBTree[K,V],BBTree[K,V]	proc `-+-`[K, V](s1, s2: BBTree[K, V]): BBTree[K, V]		640
+nim	`<`	trees/bbtree.html#<,BBTree[K,U],BBTree[K,V]	proc `<`[K, U, V](s1: BBTree[K, U]; s2: BBTree[K, V]): bool		644
+nim	`<=`	trees/bbtree.html#<=,BBTree[K,U],BBTree[K,V]	proc `<=`[K, U, V](s1: BBTree[K, U]; s2: BBTree[K, V]): bool		652
+nim	`=?=`	trees/bbtree.html#=?=,BBTree[K,U],BBTree[K,V]	proc `=?=`[K, U, V](s1: BBTree[K, U]; s2: BBTree[K, V]): bool		668
+nim	toSet	trees/bbtree.html#toSet,openArray[K]	proc toSet[K](keys: openArray[K]): BBTree[K, bool]		675
+nim	countKeys	trees/bbtree.html#countKeys,BBTree[K,V]	proc countKeys[K, V](root: BBTree[K, V]): int		689
+nim	isBalanced	trees/bbtree.html#isBalanced,BBTree[K,V]	proc isBalanced[K, V](root: BBTree[K, V]): bool		722

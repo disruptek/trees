@@ -1,0 +1,22 @@
+nimTitle	redblack	trees/redblack.html	module trees/redblack		0
+nim	RedBlackTree	trees/redblack.html#RedBlackTree	type RedBlackTree		15
+nim	newRedBlackTree	trees/redblack.html#newRedBlackTree	proc newRedBlackTree[K, V](): RedBlackTree[K, V]		30
+nim	insert	trees/redblack.html#insert,RedBlackTree[K,V],K,V	proc insert[K, V](tree: RedBlackTree[K, V]; key: K; value: V): bool		160
+nim	find	trees/redblack.html#find,RedBlackTree[K,V],K	proc find[K, V](tree: RedBlackTree[K, V]; key: K): (V, bool)		207
+nim	find	trees/redblack.html#find,RedBlackTree[K,V],K,V	proc find[K, V](tree: RedBlackTree[K, V]; key: K; value: var V): bool		216
+nim	remove	trees/redblack.html#remove,RedBlackTree[K,V],K	proc remove[K, V](tree: RedBlackTree[K, V]; key: K): bool		275
+nim	len	trees/redblack.html#len,RedBlackTree[K,V]	proc len[K, V](tree: RedBlackTree[K, V]): int		314
+nim	pairs	trees/redblack.html#pairs.i,RedBlackTree[K,V]	iterator pairs[K, V](tree: RedBlackTree[K, V]): (K, V)		318
+nim	keys	trees/redblack.html#keys.i,RedBlackTree[K,V]	iterator keys[K, V](tree: RedBlackTree[K, V]): K		331
+nim	values	trees/redblack.html#values.i,RedBlackTree[K,V]	iterator values[K, V](tree: RedBlackTree[K, V]): V		344
+nim	contains	trees/redblack.html#contains,RedBlackTree[K,V],K	proc contains[K, V](tree: RedBlackTree[K, V]; key: K): bool		357
+nim	min	trees/redblack.html#min,RedBlackTree[K,V]	proc min[K, V](tree: RedBlackTree[K, V]): (K, V)		375
+nim	max	trees/redblack.html#max,RedBlackTree[K,V]	proc max[K, V](tree: RedBlackTree[K, V]): (K, V)		383
+nim	popMin	trees/redblack.html#popMin,RedBlackTree[K,V]	proc popMin[K, V](tree: RedBlackTree[K, V]): (K, V)		416
+nim	popMax	trees/redblack.html#popMax,RedBlackTree[K,V]	proc popMax[K, V](tree: RedBlackTree[K, V]): (K, V)		425
+nim	`[]=`	trees/redblack.html#[]=,RedBlackTree[K,V],K,V	proc `[]=`[K, V](tree: RedBlackTree[K, V]; key: K; value: V)		434
+nim	`[]`	trees/redblack.html#[],RedBlackTree[K,V],K	proc `[]`[K, V](tree: RedBlackTree[K, V]; key: K): var V		438
+nim	pop	trees/redblack.html#pop,RedBlackTree[K,V],K	proc pop[K, V](tree: RedBlackTree[K, V]; key: K): V		446
+nim	select	trees/redblack.html#select,RedBlackTree[K,V],int	proc select[K, V](tree: RedBlackTree[K, V]; i: int): (K, V)		467
+nim	rank	trees/redblack.html#rank,RedBlackTree[K,V],K	proc rank[K, V](tree: RedBlackTree[K, V]; key: K): Natural		492
+nimgrp	find	trees/redblack.html#find-procs-all	proc		207

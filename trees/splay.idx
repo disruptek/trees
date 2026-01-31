@@ -1,0 +1,24 @@
+nimTitle	splay	trees/splay.html	module trees/splay		0
+nim	SplayTree	trees/splay.html#SplayTree	object SplayTree		13
+nim	newSplayTree	trees/splay.html#newSplayTree	proc newSplayTree[K, V](): SplayTree[K, V]		17
+nim	peek	trees/splay.html#peek,SplayTree[K,V],K	proc peek[K, V](tree: SplayTree[K, V]; key: K): (V, bool)		135
+nim	find	trees/splay.html#find,SplayTree[K,V],K,V	proc find[K, V](tree: SplayTree[K, V]; key: K; value: var V): bool		144
+nim	find	trees/splay.html#find,SplayTree[K,V],K,V_2	proc find[K, V](tree: var SplayTree[K, V]; key: K; value: var V): bool		154
+nim	find	trees/splay.html#find,SplayTree[K,V],K	proc find[K, V](tree: var SplayTree[K, V]; key: K): (V, bool)		168
+nim	insert	trees/splay.html#insert,SplayTree[K,V],K,V	proc insert[K, V](tree: var SplayTree[K, V]; key: K; value: V): bool		183
+nim	remove	trees/splay.html#remove,SplayTree[K,V],K	proc remove[K, V](tree: var SplayTree[K, V]; key: K): bool		270
+nim	len	trees/splay.html#len,SplayTree[K,V]	proc len[K, V](tree: SplayTree[K, V]): int		283
+nim	pairs	trees/splay.html#pairs.i,SplayTree[K,V]	iterator pairs[K, V](tree: SplayTree[K, V]): (K, V)		287
+nim	keys	trees/splay.html#keys.i,SplayTree[K,V]	iterator keys[K, V](tree: SplayTree[K, V]): K		300
+nim	values	trees/splay.html#values.i,SplayTree[K,V]	iterator values[K, V](tree: SplayTree[K, V]): V		313
+nim	contains	trees/splay.html#contains,SplayTree[K,V],K	proc contains[K, V](tree: SplayTree[K, V]; key: K): bool		326
+nim	min	trees/splay.html#min,SplayTree[K,V]	proc min[K, V](tree: SplayTree[K, V]): (K, V)		345
+nim	max	trees/splay.html#max,SplayTree[K,V]	proc max[K, V](tree: SplayTree[K, V]): (K, V)		353
+nim	popMin	trees/splay.html#popMin,SplayTree[K,V]	proc popMin[K, V](tree: var SplayTree[K, V]): (K, V)		361
+nim	popMax	trees/splay.html#popMax,SplayTree[K,V]	proc popMax[K, V](tree: var SplayTree[K, V]): (K, V)		370
+nim	`[]=`	trees/splay.html#[]=,SplayTree[K,V],K,V	proc `[]=`[K, V](tree: var SplayTree[K, V]; key: K; value: V)		379
+nim	`[]`	trees/splay.html#[],SplayTree[K,V],K	proc `[]`[K, V](tree: var SplayTree[K, V]; key: K): var V		383
+nim	pop	trees/splay.html#pop,SplayTree[K,V],K	proc pop[K, V](tree: var SplayTree[K, V]; key: K): V		392
+nim	select	trees/splay.html#select,SplayTree[K,V],int	proc select[K, V](tree: SplayTree[K, V]; i: int): (K, V)		415
+nim	rank	trees/splay.html#rank,SplayTree[K,V],K	proc rank[K, V](tree: SplayTree[K, V]; key: K): Natural		438
+nimgrp	find	trees/splay.html#find-procs-all	proc		144

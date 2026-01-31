@@ -1,0 +1,22 @@
+nimTitle	wavl	trees/wavl.html	module trees/wavl		0
+nim	WAVLTree	trees/wavl.html#WAVLTree	object WAVLTree		20
+nim	newWAVLTree	trees/wavl.html#newWAVLTree	proc newWAVLTree[K, V](): WAVLTree[K, V]		25
+nim	min	trees/wavl.html#min,WAVLTree[K,V]	proc min[K, V](tree: WAVLTree[K, V]): (K, V)		57
+nim	max	trees/wavl.html#max,WAVLTree[K,V]	proc max[K, V](tree: WAVLTree[K, V]): (K, V)		65
+nim	insert	trees/wavl.html#insert,WAVLTree[K,V],sinkK,sinkV	proc insert[K, V](tree: var WAVLTree[K, V]; key: sink K; value: sink V): bool		192
+nim	find	trees/wavl.html#find,WAVLTree[K,V],K	proc find[K, V](tree: WAVLTree[K, V]; key: K): (V, bool)		229
+nim	find	trees/wavl.html#find,WAVLTree[K,V],K,V	proc find[K, V](tree: WAVLTree[K, V]; key: K; value: var V): bool		236
+nim	contains	trees/wavl.html#contains,WAVLTree[K,V],K	proc contains[K, V](tree: WAVLTree[K, V]; key: K): bool		244
+nim	`[]=`	trees/wavl.html#[]=,WAVLTree[K,V],K,V	proc `[]=`[K, V](tree: var WAVLTree[K, V]; key: K; value: V)		248
+nim	`[]`	trees/wavl.html#[],WAVLTree[K,V],K	proc `[]`[K, V](tree: WAVLTree[K, V]; key: K): var V		252
+nim	remove	trees/wavl.html#remove,WAVLTree[K,V],K	proc remove[K, V](tree: var WAVLTree[K, V]; key: K): bool		403
+nim	pop	trees/wavl.html#pop,WAVLTree[K,V],K	proc pop[K, V](tree: var WAVLTree[K, V]; key: K): V		411
+nim	len	trees/wavl.html#len,WAVLTree[K,V]	proc len[K, V](tree: WAVLTree[K, V]): int		420
+nim	pairs	trees/wavl.html#pairs.i,WAVLTree[K,V]	iterator pairs[K, V](tree: WAVLTree[K, V]): (K, V)		424
+nim	keys	trees/wavl.html#keys.i,WAVLTree[K,V]	iterator keys[K, V](tree: WAVLTree[K, V]): K		437
+nim	values	trees/wavl.html#values.i,WAVLTree[K,V]	iterator values[K, V](tree: WAVLTree[K, V]): V		450
+nim	select	trees/wavl.html#select,WAVLTree[K,V],int	proc select[K, V](tree: WAVLTree[K, V]; i: int): (K, V)		475
+nim	rank	trees/wavl.html#rank,WAVLTree[K,V],K	proc rank[K, V](tree: WAVLTree[K, V]; key: K): Natural		498
+nim	popMin	trees/wavl.html#popMin,WAVLTree[K,V]	proc popMin[K, V](tree: var WAVLTree[K, V]): (K, V)		508
+nim	popMax	trees/wavl.html#popMax,WAVLTree[K,V]	proc popMax[K, V](tree: var WAVLTree[K, V]): (K, V)		517
+nimgrp	find	trees/wavl.html#find-procs-all	proc		229

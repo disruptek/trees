@@ -269,4 +269,91 @@ proc main =
         checkOrder(tree, x)
       check tree.len == 0
 
+    test "splay contains":
+      var tree: SplayTree[int, char]
+      tree.insert(1, 'a')
+      tree.insert(5, 'b')
+      check tree.contains(1)
+      check tree.contains(5)
+      check not tree.contains(10)
+
+    test "splay min max":
+      var tree: SplayTree[int, char]
+      tree.insert(5, 'b')
+      tree.insert(1, 'a')
+      tree.insert(10, 'c')
+      check tree.min() == (1, 'a')
+      check tree.max() == (10, 'c')
+
+    test "splay popMin popMax":
+      var tree: SplayTree[int, char]
+      tree.insert(5, 'b')
+      tree.insert(6, 'f')
+      tree.insert(10, 'c')
+      tree.insert(1, 'a')
+      tree.insert(8, 'd')
+      tree.insert(7, 'e')
+      check tree.popMin() == (1, 'a')
+      check tree.popMin() == (5, 'b')
+      check tree.popMax() == (10, 'c')
+      check tree.popMax() == (8, 'd')
+
+    test "splay array access":
+      var tree: SplayTree[int, char]
+      tree[1] = 'a'
+      tree[5] = 'b'
+      tree[5] = 'd'
+      check tree[1] == 'a'
+      check tree[5] == 'd'
+      check tree.pop(1) == 'a'
+      tree.pop(5)
+      check tree.len == 0
+
+    test "splay select rank (0-based)":
+      var tree: SplayTree[int, char]
+      tree.insert(5, 'b')
+      check tree.select(0)[0] == 5
+      tree.insert(10, 'c')
+      check tree.select(0)[0] == 5
+      check tree.select(1)[0] == 10
+      tree.insert(1, 'a')
+      check tree.select(0)[1] == 'a'
+      check tree.select(0)[0] == 1
+      check tree.select(1)[0] == 5
+      check tree.select(2)[0] == 10
+      check tree.select(-1)[0] == 10
+      check tree.select(-2)[0] == 5
+      check 0 == tree.rank(tree.select(0)[0])
+      check 1 == tree.rank(tree.select(1)[0])
+      check 2 == tree.rank(tree.select(2)[0])
+
+    test "splay iterators":
+      var tree: SplayTree[int, char]
+      for i in 1..10:
+        tree.insert(i, chr(ord('a') + i))
+      var i = 1
+      for key in tree.keys():
+        check(i == key)
+        i += 1
+      check(i == 11)
+      i = 1
+      for value in tree.values():
+        check(i == ord(value) - ord('a'))
+        i += 1
+      check(i == 11)
+
+    test "splay peek (non-splaying query)":
+      var tree: SplayTree[int, char]
+      tree.insert(1, 'a')
+      tree.insert(10, 'c')
+      tree.insert(5, 'b')
+      # After insert(5), root should be 5
+      check tree.root.key == 5
+      # peek should not splay
+      check tree.peek(1) == ('a', true)
+      check tree.root.key == 5  # root unchanged
+      check tree.peek(10) == ('c', true)
+      check tree.root.key == 5  # root unchanged
+      check tree.peek(999) == ('\0', false)
+
 main()
